@@ -43,7 +43,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The Engagement Record store interface has exactly one caller path in the codebase (FastAPI) — no agent or tool writes to it directly.
   3. A throwaway two-agent Strands smoke test shows a supervisor routing to a distinct specialist agent, with independent tool-call trace entries for each.
   4. A Bedrock connectivity smoke test successfully calls Claude using an explicitly pinned model id and region, or fails fast with a readable, diagnosable error.
-**Plans**: TBD
+**Plans:** 1 plan
+- [ ] 01-01-PLAN.md — Scaffold backend, Engagement Record model + file store round-trip (REC-01/02), single-writer AST test (REC-03), Strands agents-as-tools + Bedrock fail-fast smoke spike (ORC-03)
 
 ### Phase 2: Gig Triage Agent (standalone)
 **Mode:** mvp
@@ -136,7 +137,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/TBD | Not started | - |
+| 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/1 | Planned | - |
 | 2. Gig Triage Agent (standalone) | 0/TBD | Not started | - |
 | 3. Supervisor Wiring + `/capture` Endpoint | 0/TBD | Not started | - |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
