@@ -87,13 +87,43 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (to be mapped by roadmapper) | — | Pending |
+| REC-01 | Phase 1 | Pending |
+| REC-02 | Phase 1 | Pending |
+| REC-03 | Phase 1 | Pending |
+| ORC-03 | Phase 1 | Pending |
+| TRI-01 | Phase 2 | Pending |
+| TRI-02 | Phase 2 | Pending |
+| TRI-03 | Phase 2 | Pending |
+| TRI-04 | Phase 2 | Pending |
+| ORC-02 | Phase 3 | Pending |
+| API-01 | Phase 3 | Pending |
+| API-02 | Phase 3 | Pending |
+| CAP-01 | Phase 4 | Pending |
+| CAP-02 | Phase 4 | Pending |
+| CAP-03 | Phase 4 | Pending |
+| PROP-01 | Phase 5 | Pending |
+| PROP-02 | Phase 5 | Pending |
+| PROP-03 | Phase 5 | Pending |
+| PROP-04 | Phase 5 | Pending |
+| ORC-01 | Phase 6 | Pending |
+| API-03 | Phase 6 | Pending |
+| OPS-01 | Phase 6 | Pending |
+| OPS-02 | Phase 6 | Pending |
+| OPS-03 | Phase 6 | Pending |
+| OPS-04 | Phase 6 | Pending |
+| DEMO-01 | Phase 6 | Pending |
+| DEMO-02 | Phase 7 | Pending |
+| DEMO-03 | Phase 7 | Pending |
+| DEMO-04 | Phase 7 | Pending |
+| DEMO-05 | Phase 7 | Pending |
+| DEPLOY-01 (v2) | Phase 8 (optional) | Deferred |
+| DEPLOY-02 (v2) | Phase 8 (optional) | Deferred |
 
 **Coverage:**
-- v1 requirements: 25 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 25 ⚠️
+- v1 requirements: 29 total (corrected from a stale count of 25 in this file's original draft — recounted directly against the REQ-IDs listed above)
+- Mapped to phases: 29/29
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-01*
-*Last updated: 2026-09-01 after initialization*
+*Last updated: 2026-09-01 after roadmap creation*
