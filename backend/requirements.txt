@@ -1,0 +1,4 @@
+strands-agents==1.54.0
+pydantic>=2.13,<3
+boto3>=1.43,<2
+pytest
