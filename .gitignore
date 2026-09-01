@@ -1,6 +1,7 @@
 # --- GSD runtime / local state (keep the shareable install + planning docs, ignore local artifacts) ---
 # .planning/ is tracked (commit_docs=Yes); ignore only noisy runtime traces within it
 .planning/.gsd-trace.jsonl
+.planning/state.json
 .planning/ui-reviews/
 .claude/.gsd-staging/
 .claude/gsd-install-state.json
