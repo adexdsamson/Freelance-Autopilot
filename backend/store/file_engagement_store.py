@@ -11,8 +11,18 @@ import os
 from pathlib import Path
 from uuid import UUID
 
+from pydantic import ValidationError
+
 from models.engagement_record import EngagementRecord
 from store.engagement_store import EngagementStore
+
+
+class StoreCorruptError(ValueError):
+    """Raised when an on-disk engagement record cannot be parsed/validated.
+
+    Names the engagement_id and file path (never the raw file content, which
+    could contain client data) so the failure is diagnosable, not silent.
+    """
 
 
 class FileEngagementStore(EngagementStore):
@@ -35,7 +45,13 @@ class FileEngagementStore(EngagementStore):
         path = self._path(engagement_id)
         if not path.exists():
             return None
-        return EngagementRecord.model_validate_json(path.read_text())
+        try:
+            return EngagementRecord.model_validate_json(path.read_text())
+        except ValidationError as e:
+            raise StoreCorruptError(
+                f"engagement record {engagement_id} at {path} is corrupt or "
+                f"schema-incompatible and could not be loaded"
+            ) from e
 
     def save(self, record: EngagementRecord) -> None:
         path = self._path(record.engagement_id)
