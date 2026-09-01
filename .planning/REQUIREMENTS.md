@@ -9,15 +9,15 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Engagement Record & Persistence
 
-- [ ] **REC-01**: A single Pydantic-typed Engagement Record models job, triage, proposal, contract, and ops slices per the PRD 6.2 shape.
-- [ ] **REC-02**: An Engagement Record is persisted per engagement to a durable store (file-based JSON or SQLite) behind a store interface, so stages invoked from separate HTTP requests share state.
-- [ ] **REC-03**: FastAPI is the sole writer that merges each specialist agent's typed output into the Engagement Record (agents do not mutate the record directly).
+- [x] **REC-01**: A single Pydantic-typed Engagement Record models job, triage, proposal, contract, and ops slices per the PRD 6.2 shape.
+- [x] **REC-02**: An Engagement Record is persisted per engagement to a durable store (file-based JSON or SQLite) behind a store interface, so stages invoked from separate HTTP requests share state.
+- [x] **REC-03**: FastAPI is the sole writer that merges each specialist agent's typed output into the Engagement Record (agents do not mutate the record directly).
 
 ### Orchestration (Strands Supervisor)
 
 - [ ] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
 - [ ] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
-- [ ] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
+- [x] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
 
 ### Gig Triage (Stage 1 — autonomous)
 
@@ -87,10 +87,10 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REC-01 | Phase 1 | Pending |
-| REC-02 | Phase 1 | Pending |
-| REC-03 | Phase 1 | Pending |
-| ORC-03 | Phase 1 | Pending |
+| REC-01 | Phase 1 | Complete |
+| REC-02 | Phase 1 | Complete |
+| REC-03 | Phase 1 | Complete |
+| ORC-03 | Phase 1 | Complete |
 | TRI-01 | Phase 2 | Pending |
 | TRI-02 | Phase 2 | Pending |
 | TRI-03 | Phase 2 | Pending |
@@ -120,6 +120,7 @@ Populated during roadmap creation.
 | DEPLOY-02 (v2) | Phase 8 (optional) | Deferred |
 
 **Coverage:**
+
 - v1 requirements: 29 total (corrected from a stale count of 25 in this file's original draft — recounted directly against the REQ-IDs listed above)
 - Mapped to phases: 29/29
 - Unmapped: 0 ✓
