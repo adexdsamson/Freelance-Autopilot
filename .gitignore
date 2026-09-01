@@ -1,8 +1,9 @@
-# --- GSD runtime / local state (keep the shareable install, ignore local artifacts) ---
-.planning/
+# --- GSD runtime / local state (keep the shareable install + planning docs, ignore local artifacts) ---
+# .planning/ is tracked (commit_docs=Yes); ignore only noisy runtime traces within it
+.planning/.gsd-trace.jsonl
+.planning/ui-reviews/
 .claude/.gsd-staging/
 .claude/gsd-install-state.json
-ui-reviews/
 
 # --- Python (backend) ---
 __pycache__/
