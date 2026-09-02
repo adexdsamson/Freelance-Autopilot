@@ -80,7 +80,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The Gig Triage Agent's typed JSON output reaches the Engagement Record unmodified — the Supervisor's model does not re-author or paraphrase it before FastAPI merges it in.
   4. Trace/log inspection of one `/capture` call shows two distinct Agent invocations (Supervisor and Gig Triage), not one flat call.
 
-**Plans**: TBD
+**Plans:** 1 plan
+
+- [ ] 03-01-PLAN.md — Supervisor+Gig Triage agents-as-tools typed channel (ORC-02) behind a TRIAGE_BACKEND seam, deterministic placeholder triage, `POST /capture` + `GET /engagements/{id}` (API-01/02), FastAPI sole-writer, Bedrock fail-fast 503
 
 ### Phase 4: Chrome Extension Capture UI
 
@@ -166,7 +168,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 |-------|----------------|--------|-----------|
 | 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/1 | Planned    |  |
 | 2. Gig Triage Agent (standalone) | 0/TBD | Not started | - |
-| 3. Supervisor Wiring + `/capture` Endpoint | 0/TBD | Not started | - |
+| 3. Supervisor Wiring + `/capture` Endpoint | 0/1 | Planned | - |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
 | 5. Proposal-Contract Agent + `/advance` (proposal) | 0/TBD | Not started | - |
 | 6. Ops Agent, Fixtures & Full Supervisor Wiring | 0/TBD | Not started | - |
