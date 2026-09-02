@@ -42,3 +42,11 @@ def test_capture_round_trips_via_get(client):
     assert get_body["triage"]["verdict"] == post_body["verdict"]
     assert get_body["triage"]["score"] == post_body["score"]
     assert get_body["triage"]["reasoning"] == post_body["reasoning"]
+
+
+def test_capture_rejects_malformed_payload(client):
+    """T-03-01: a body missing required title/description fails Pydantic
+    validation with a native 422 -- never a 500."""
+    response = client.post("/capture", json={"budget": 500.0})
+
+    assert response.status_code == 422
