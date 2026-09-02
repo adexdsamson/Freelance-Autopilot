@@ -51,10 +51,15 @@ def extract_triage_result(supervisor_messages: list[dict]) -> TriageSlice:
     a structural guarantee, not a convention.
     """
     for message in supervisor_messages:
+        if not isinstance(message, dict):
+            continue
         for block in message.get("content", []):
             if not isinstance(block, dict) or "toolResult" not in block:
                 continue
-            for content_block in block["toolResult"].get("content", []):
-                if "json" in content_block:
+            tool_result = block["toolResult"]
+            if not isinstance(tool_result, dict):
+                continue
+            for content_block in tool_result.get("content", []):
+                if isinstance(content_block, dict) and "json" in content_block:
                     return TriageSlice.model_validate(content_block["json"])
     raise RuntimeError("gig_triage_agent tool result not found in supervisor trace")

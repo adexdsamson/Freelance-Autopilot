@@ -81,3 +81,38 @@ def test_extract_triage_result_raises_when_absent():
         assert False, "expected RuntimeError when no toolResult json block is present"
     except RuntimeError:
         pass
+
+
+def test_extract_triage_result_tolerates_malformed_content_blocks():
+    """CR-02 regression: non-dict messages / content blocks / toolResult
+    payloads must be skipped, not indexed — no unhandled TypeError. When no
+    valid json block exists among the noise, the documented RuntimeError
+    (never a raw TypeError) is raised."""
+    import pytest
+
+    messages = [
+        "not-a-dict-message",  # non-dict message
+        {"role": "assistant", "content": ["not-a-dict-block", 42]},  # non-dict blocks
+        {"role": "assistant", "content": [{"toolResult": "not-a-dict"}]},  # non-dict toolResult
+        {
+            "role": "assistant",
+            "content": [{"toolResult": {"content": ["not-a-dict", 7, None]}}],  # non-dict inner blocks
+        },
+    ]
+
+    with pytest.raises(RuntimeError):
+        extract_triage_result(messages)
+
+
+def test_extract_triage_result_finds_json_amid_malformed_noise():
+    """The valid json block is still located even when earlier blocks are
+    malformed (the guards `continue` past noise rather than crashing)."""
+    payload = {"verdict": "apply", "score": 0.7, "reasoning": "ok"}
+    messages = [
+        "junk",
+        {"role": "assistant", "content": [{"toolResult": {"content": ["junk"]}}]},
+        _toolresult_message(payload),
+    ]
+
+    result = extract_triage_result(messages)
+    assert result.verdict == "apply"

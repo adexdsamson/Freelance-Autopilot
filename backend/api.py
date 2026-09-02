@@ -19,6 +19,10 @@ from uuid import UUID
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
+from strands.types.exceptions import (
+    ContextWindowOverflowException,
+    ModelThrottledException,
+)
 
 from agents.triage_runner import TriageRunner, get_triage_runner
 from models.engagement_record import EngagementRecord, JobSlice
@@ -26,10 +30,16 @@ from store.engagement_store import EngagementStore
 from store.file_engagement_store import FileEngagementStore
 
 app = FastAPI()
-_store = FileEngagementStore()  # single construction point (Phase 1's swap seam)
+_store: EngagementStore | None = None
 
 
 def get_store() -> EngagementStore:
+    # Lazy single construction point (Phase 1's swap seam). Constructing at
+    # first-use rather than import time avoids a cwd-relative mkdir side effect
+    # when the module is merely imported (e.g. by tests or tooling).
+    global _store
+    if _store is None:
+        _store = FileEngagementStore()
     return _store
 
 
@@ -54,8 +64,11 @@ def map_bedrock_error(exc: Exception) -> BedrockUnavailableError:
 
     Mirrors backend/scripts/smoke_test_bedrock_connectivity.py's taxonomy:
     NoCredentialsError -> static string; ClientError -> Error.Code only
-    (never Message); BotoCoreError -> exception type name only; anything
-    else -> exception type name only.
+    (never Message); strands ModelThrottledException / ContextWindowOverflowException
+    (plain Exception subclasses, NOT BotoCoreError — so they must be handled
+    before the BotoCoreError branch and are caught by /capture's catch-all);
+    BotoCoreError -> exception type name only; anything else -> exception type
+    name only.
     """
     if isinstance(exc, NoCredentialsError):
         return BedrockUnavailableError("no AWS credentials found for Bedrock.")
@@ -63,6 +76,14 @@ def map_bedrock_error(exc: Exception) -> BedrockUnavailableError:
         code = exc.response.get("Error", {}).get("Code", "Unknown")
         return BedrockUnavailableError(
             f"Bedrock ClientError [{code}] — see the Bedrock console."
+        )
+    if isinstance(exc, ModelThrottledException):
+        return BedrockUnavailableError(
+            "Bedrock throttled the triage model invocation; retry with backoff."
+        )
+    if isinstance(exc, ContextWindowOverflowException):
+        return BedrockUnavailableError(
+            "the triage prompt exceeded the model's context window."
         )
     if isinstance(exc, BotoCoreError):
         return BedrockUnavailableError(
@@ -82,7 +103,13 @@ def capture(
     record = EngagementRecord(job=job)
     try:
         record.triage = triage_runner(job)  # typed, VERBATIM merge (D-02/ORC-02)
-    except (NoCredentialsError, ClientError, BotoCoreError) as exc:
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001 — /capture must never surface a raw 500 from triage
+        # Any triage failure (botocore creds/ClientError/timeout, strands
+        # ModelThrottled/ContextWindowOverflow, or an unexpected type) maps to a
+        # readable, credential-free 503. map_bedrock_error emits only the
+        # exception type / Error.Code — never the raw AWS Message or a secret.
         mapped = map_bedrock_error(exc)
         raise HTTPException(status_code=503, detail=str(mapped)) from mapped
     store.create(record)
