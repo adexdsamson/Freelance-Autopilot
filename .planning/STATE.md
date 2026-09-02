@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 1
-current_phase_name: Foundations — Engagement Record & Strands/Bedrock Verification Spike
-status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-09-01T11:42:06.861Z"
-last_activity: 2026-09-01
-last_activity_desc: Roadmap created from requirements + research; 29/29 v1 requirements mapped across 8 phases (7 core, 1 optional cut-first)
+current_phase: 2
+current_phase_name: Gig Triage Agent (standalone)
+status: complete
+stopped_at: Phase 2 complete (TRI-01..04); ready for Phase 3
+last_updated: "2026-09-02T00:00:00.000Z"
+last_activity: 2026-09-02
+last_activity_desc: Phase 2 executed — Gig Triage Agent (deterministic gate + LLM scorecard) delivered standalone; 106 backend tests passing
 state_head: 8b222fd80dfad3c84eea4d74e7096cbaf40878d3
 progress:
   total_phases: 8
-  completed_phases: 0
-  total_plans: 1
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 4
+  completed_plans: 3
+  percent: 13
 ---
 
 # Project State
@@ -27,12 +27,12 @@ See: .planning/PROJECT.md (updated 2026-09-01)
 
 ## Current Position
 
-Phase: 1 of 8 (Foundations — Engagement Record & Strands/Bedrock Verification Spike)
-Plan: 1 of 1 in current phase
-Status: Ready to execute
-Last activity: 2026-09-01 — Roadmap created from requirements + research; 29/29 v1 requirements mapped across 8 phases (7 core, 1 optional cut-first)
+Phase: 2 of 8 (Gig Triage Agent (standalone))
+Plan: 3 of 3 in current phase
+Status: Complete — ready for Phase 3 (Supervisor wiring + /capture)
+Last activity: 2026-09-02 — Phase 2 executed; Gig Triage Agent delivered standalone
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 13%
 
 ## Performance Metrics
 
@@ -78,6 +78,13 @@ None yet.
 
 ### Blockers/Concerns
 
+- [Phase 2 → demo]: `llm_scorecard` has never run against live Bedrock — this machine has no usable AWS
+  credentials. All deterministic behaviour around it is tested; the live round trip (model id resolving in
+  the configured region, Claude filling `ScorecardJudgment` cleanly) is not. Run
+  `cd backend && python -m scripts.run_triage strong_fixed_apply` with real credentials before recording.
+- [Repo]: `origin/main` does NOT contain Phase 1's implementation. PR #1's merge commit captured the
+  phase-01 branch at its planning commit, so all 7 implementation commits stayed on
+  `gsd/phase-01-foundations-...`. Phase 2 is branched off that branch, not off main. Both need merging.
 - [Phase 1]: Strands multi-agent API surface (`.as_tool()` signature, delegation constraints) must be re-verified against the exact pinned SDK version before building real specialists — do not build from training-data assumptions (research Pitfall 1).
 - [Phase 1]: Exact Bedrock model id/inference-profile string and region must be confirmed against the team's AWS account's "Model access" console page at build time, not hardcoded from research.
 - [Phase 5]: Structured-output schema for the Proposal-Contract Agent must treat `needs_human_input`/`question` as first-class optional fields from the start, or an ambiguous-scope fixture will crash the agent instead of escalating (research Pitfall 3).
