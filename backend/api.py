@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -39,6 +40,39 @@ class CaptureResponse(BaseModel):
     reasoning: str
 
 
+class BedrockUnavailableError(RuntimeError):
+    """Readable, non-leaking Bedrock failure (T-03-02).
+
+    Never includes the raw AWS error `Message` or any credential literal —
+    only the exception type / `Error.Code`. Reuses Phase 1's proven
+    taxonomy (backend/scripts/smoke_test_bedrock_connectivity.py).
+    """
+
+
+def map_bedrock_error(exc: Exception) -> BedrockUnavailableError:
+    """Map a botocore/Bedrock exception to a static, credential-free message.
+
+    Mirrors backend/scripts/smoke_test_bedrock_connectivity.py's taxonomy:
+    NoCredentialsError -> static string; ClientError -> Error.Code only
+    (never Message); BotoCoreError -> exception type name only; anything
+    else -> exception type name only.
+    """
+    if isinstance(exc, NoCredentialsError):
+        return BedrockUnavailableError("no AWS credentials found for Bedrock.")
+    if isinstance(exc, ClientError):
+        code = exc.response.get("Error", {}).get("Code", "Unknown")
+        return BedrockUnavailableError(
+            f"Bedrock ClientError [{code}] — see the Bedrock console."
+        )
+    if isinstance(exc, BotoCoreError):
+        return BedrockUnavailableError(
+            f"AWS SDK error ({type(exc).__name__}) talking to Bedrock."
+        )
+    return BedrockUnavailableError(
+        f"unexpected error contacting Bedrock ({type(exc).__name__})."
+    )
+
+
 @app.post("/capture", response_model=CaptureResponse)
 def capture(
     job: JobSlice,
@@ -46,7 +80,11 @@ def capture(
     triage_runner: Annotated[TriageRunner, Depends(get_triage_runner)],
 ) -> CaptureResponse:
     record = EngagementRecord(job=job)
-    record.triage = triage_runner(job)  # typed, VERBATIM merge (D-02/ORC-02)
+    try:
+        record.triage = triage_runner(job)  # typed, VERBATIM merge (D-02/ORC-02)
+    except (NoCredentialsError, ClientError, BotoCoreError) as exc:
+        mapped = map_bedrock_error(exc)
+        raise HTTPException(status_code=503, detail=str(mapped)) from mapped
     store.create(record)
     return CaptureResponse(
         engagement_id=record.engagement_id,
