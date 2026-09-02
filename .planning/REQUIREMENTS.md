@@ -16,7 +16,7 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 ### Orchestration (Strands Supervisor)
 
 - [ ] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
-- [ ] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
+- [x] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
 - [x] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
 
 ### Gig Triage (Stage 1 — autonomous)
@@ -28,8 +28,8 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Capture API & Endpoints
 
-- [ ] **API-01**: `POST /capture` accepts a structured job payload, runs triage via the Supervisor, writes the result to a new Engagement Record, and returns the verdict.
-- [ ] **API-02**: `GET /engagements/{id}` returns the current Engagement Record.
+- [x] **API-01**: `POST /capture` accepts a structured job payload, runs triage via the Supervisor, writes the result to a new Engagement Record, and returns the verdict.
+- [x] **API-02**: `GET /engagements/{id}` returns the current Engagement Record.
 - [ ] **API-03**: `POST /engagements/{id}/advance` advances the engagement to the next stage (proposal/contract, then ops) and returns the updated record.
 
 ### Chrome Extension (capture client)
@@ -95,9 +95,9 @@ Populated during roadmap creation.
 | TRI-02 | Phase 2 | Pending |
 | TRI-03 | Phase 2 | Pending |
 | TRI-04 | Phase 2 | Pending |
-| ORC-02 | Phase 3 | Pending |
-| API-01 | Phase 3 | Pending |
-| API-02 | Phase 3 | Pending |
+| ORC-02 | Phase 3 | Complete |
+| API-01 | Phase 3 | Complete |
+| API-02 | Phase 3 | Complete |
 | CAP-01 | Phase 4 | Pending |
 | CAP-02 | Phase 4 | Pending |
 | CAP-03 | Phase 4 | Pending |
@@ -127,4 +127,4 @@ Populated during roadmap creation.
 
 ---
 *Requirements defined: 2026-09-01*
-*Last updated: 2026-09-01 after roadmap creation*
+*Last updated: 2026-09-02 after Phase 3 (ORC-02, API-01, API-02 complete)*
