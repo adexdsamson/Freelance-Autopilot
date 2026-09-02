@@ -37,11 +37,14 @@ def _deterministic_triage_runner(job: JobSlice) -> TriageSlice:
 def _supervisor_triage_runner(job: JobSlice) -> TriageSlice:
     """Live path: real Supervisor -> Gig Triage Agent via Bedrock.
 
-    TODO(Task 4): wire to backend/agents/supervisor.py's build_supervisor()
-    + extract_triage_result(). Manual-verification-only per D-06 — never
-    exercised by an automated test.
+    Manual-verification-only per D-06 — never exercised by an automated
+    test (needs real AWS/Bedrock credentials).
     """
-    raise NotImplementedError("supervisor triage path is wired in Task 4")
+    from agents.supervisor import build_supervisor, extract_triage_result
+
+    supervisor = build_supervisor()
+    supervisor(f"Triage this job: {job.model_dump_json()}")
+    return extract_triage_result(supervisor.messages)
 
 
 def get_triage_runner() -> TriageRunner:
