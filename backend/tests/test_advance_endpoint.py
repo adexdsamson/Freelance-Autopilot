@@ -3,7 +3,8 @@ placeholder path only (no Bedrock — PROPOSAL_BACKEND defaults to
 'placeholder')."""
 from uuid import uuid4
 
-from models.engagement_record import EngagementRecord, JobSlice
+from api import app, get_proposal_runner
+from models.engagement_record import EngagementRecord, JobSlice, ProposalContractResult
 
 
 def test_advance_clear_scope_returns_proposal_contract_and_round_trips(client):
@@ -128,4 +129,56 @@ def test_advance_ambiguous_scope_escalates_and_round_trips(client):
     assert get_response.status_code == 200
     get_body = get_response.json()
     assert get_body["proposal"] == advance_body["proposal"]
+    assert get_body["contract"] is None
+
+
+def test_advance_re_advance_escalation_clears_stale_contract(client):
+    """CR-01 regression: re-advancing the same engagement, happy path then
+    escalation, must clear the previously-persisted contract at BOTH the
+    HTTP response and the persisted-record level (SC3's intent is a
+    statement about the record/response, not just a single result object —
+    the schema-level validator alone cannot catch this)."""
+    capture_response = client.post(
+        "/capture",
+        json={
+            "title": "Build a marketing site",
+            "description": (
+                "Standard React build with a clear scope, three deliverable "
+                "phases, and a deadline in 6 weeks."
+            ),
+            "budget": 2000.0,
+        },
+    )
+    assert capture_response.status_code == 200
+    engagement_id = capture_response.json()["engagement_id"]
+
+    # First advance: real deterministic happy path -- populates the contract.
+    first_response = client.post(
+        f"/engagements/{engagement_id}/advance", params={"stage": "proposal"}
+    )
+    assert first_response.status_code == 200
+    assert first_response.json()["contract"]["text"]
+
+    # Second advance: an injected/overridden runner returns an escalation
+    # result for the SAME engagement (e.g. a live-path retry that escalates).
+    def _escalating_runner(job):
+        return ProposalContractResult(needs_human_input=True, question="q?")
+
+    app.dependency_overrides[get_proposal_runner] = lambda: _escalating_runner
+    try:
+        second_response = client.post(
+            f"/engagements/{engagement_id}/advance", params={"stage": "proposal"}
+        )
+    finally:
+        del app.dependency_overrides[get_proposal_runner]
+
+    assert second_response.status_code == 200
+    second_body = second_response.json()
+    assert second_body["proposal"]["needs_human_input"] is True
+    assert second_body["contract"] is None
+
+    get_response = client.get(f"/engagements/{engagement_id}")
+    assert get_response.status_code == 200
+    get_body = get_response.json()
+    assert get_body["proposal"]["needs_human_input"] is True
     assert get_body["contract"] is None

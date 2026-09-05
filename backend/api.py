@@ -13,9 +13,12 @@ POST /engagements/{engagement_id}/advance?stage=proposal: load the record
 (404 if unknown), guard that triage exists and verdict == "apply" (409
 otherwise), run the Proposal-Contract specialist via the ProposalRunner DI
 seam, merge the typed ProposalContractResult VERBATIM into proposal (+
-contract on the happy path only — no re-authoring, D-02/D-05), persist via
-store.save, and return the updated record. An unsupported `stage` value is
-a 400 (T-05-03) — Phase 6 adds `stage="ops"` here without a rewrite.
+contract on the happy path only, explicitly cleared to None on escalation
+so a re-advance can never leave a stale contract alongside
+needs_human_input=True (CR-01/SC3) — no re-authoring, D-02/D-05), persist
+via store.save, and return the updated record. An unsupported `stage`
+value is a 400 (T-05-03) — Phase 6 adds `stage="ops"` here without a
+rewrite.
 
 api.py is the ONLY module in this codebase that imports the store.
 """
@@ -187,7 +190,16 @@ def advance(
         needs_human_input=result.needs_human_input,
         question=result.question,
     )
-    if not result.needs_human_input:
+    if result.needs_human_input:
+        # CR-01: an escalation result must clear any stale contract from a
+        # prior /advance call on this same engagement -- otherwise the
+        # persisted record (and this response) could carry
+        # needs_human_input=True alongside a fully populated contract,
+        # violating SC3 at the persisted-record level (the schema-level
+        # validator only enforces exclusivity within a SINGLE result, not
+        # across repeated /advance calls).
+        record.contract = None
+    else:
         record.contract = ContractSlice(
             text=result.contract_text,
             payment_schedule=result.payment_schedule,
