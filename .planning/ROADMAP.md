@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Gig Triage Agent (standalone)** - Build and validate the fully autonomous Stage 1 specialist (deterministic gate + LLM scorecard) against fixture jobs, with no Supervisor or API yet.
 - [ ] **Phase 3: Supervisor Wiring + `/capture` Endpoint** - Wire the Supervisor to the Gig Triage Agent via agents-as-tools and expose `/capture` + `GET /engagements/{id}`, proving Stage 1 end-to-end.
 - [ ] **Phase 4: Chrome Extension Capture UI** - Ship the Manifest V3 paste-based capture popup that posts to `/capture` and renders the triage verdict inline.
-- [ ] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity.
+- [x] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity. (completed 2026-09-05)
 - [ ] **Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring** - Build the Stage 3 specialist (scope creep, invoice, status update), wire it as the Supervisor's third tool, and author the deterministic Stage 2-3 fixture set.
 - [ ] **Phase 7: Full Demo Verification & Submission Docs** - Verify the end-to-end pipeline runs deterministically within the 5-minute demo window and complete the submission checklist (README, license, diagram, demo script).
 - [ ] **Phase 8: AgentCore Deployment (optional, cut-first)** - Swap the Engagement Record store to AgentCore Memory and deploy the Supervisor/specialists to AgentCore Runtime, only after Phase 7's local demo is fully working, with the local path kept as fallback.
@@ -112,10 +112,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. No single response contains both a fully populated contract and `needs_human_input=true` — the happy path and the escalation path are mutually exclusive outcomes of the same schema.
   4. The Engagement Record's `proposal` and `contract` slices are populated only via FastAPI's merge of the specialist's typed output, never written by the agent directly.
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
-- [ ] 05-01-PLAN.md — Deterministic Proposal-Contract stage end-to-end: enriched Engagement Record (typed payment schedule + mutually-exclusive result model), three PRD §7.2 dual-use tools, `ProposalRunner` seam, `POST /engagements/{id}/advance?stage=proposal` (guards + verbatim merge + 503 fail-fast) — PROP-01..04, SC1-SC4 offline
-- [ ] 05-02-PLAN.md — Live two-agent path: distinct Proposal-Contract Agent + stage-scoped `build_proposal_supervisor` + `extract_proposal_result` (agents-as-tools, D-04); offline wiring proof + manual live Bedrock trace
+- [x] 05-01-PLAN.md — Deterministic Proposal-Contract stage end-to-end: enriched Engagement Record (typed payment schedule + mutually-exclusive result model), three PRD §7.2 dual-use tools, `ProposalRunner` seam, `POST /engagements/{id}/advance?stage=proposal` (guards + verbatim merge + 503 fail-fast) — PROP-01..04, SC1-SC4 offline
+- [x] 05-02-PLAN.md — Live two-agent path: distinct Proposal-Contract Agent + stage-scoped `build_proposal_supervisor` + `extract_proposal_result` (agents-as-tools, D-04); offline wiring proof + manual live Bedrock trace
 
 ### Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring
 
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | 2. Gig Triage Agent (standalone) | 0/TBD | Not started | - |
 | 3. Supervisor Wiring + `/capture` Endpoint | 0/1 | Planned | - |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
-| 5. Proposal-Contract Agent + `/advance` (proposal) | 0/2 | Planned | - |
+| 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete    | 2026-09-05 |
 | 6. Ops Agent, Fixtures & Full Supervisor Wiring | 0/TBD | Not started | - |
 | 7. Full Demo Verification & Submission Docs | 0/TBD | Not started | - |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |
