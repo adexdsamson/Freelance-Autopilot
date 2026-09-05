@@ -9,6 +9,14 @@ unknown id. `engagement_id` is typed UUID at the path param, which closes
 path traversal structurally (T-03-03) — FileEngagementStore._path()
 independently raises TypeError on any non-UUID.
 
+POST /engagements/{engagement_id}/advance?stage=proposal: load the record
+(404 if unknown), guard that triage exists and verdict == "apply" (409
+otherwise), run the Proposal-Contract specialist via the ProposalRunner DI
+seam, merge the typed ProposalContractResult VERBATIM into proposal (+
+contract on the happy path only — no re-authoring, D-02/D-05), persist via
+store.save, and return the updated record. An unsupported `stage` value is
+a 400 (T-05-03) — Phase 6 adds `stage="ops"` here without a rewrite.
+
 api.py is the ONLY module in this codebase that imports the store.
 """
 from __future__ import annotations
@@ -24,8 +32,15 @@ from strands.types.exceptions import (
     ModelThrottledException,
 )
 
+from agents.proposal_runner import ProposalRunner, get_proposal_runner
 from agents.triage_runner import TriageRunner, get_triage_runner
-from models.engagement_record import EngagementRecord, JobSlice
+from models.engagement_record import (
+    ContractSlice,
+    EngagementRecord,
+    JobSlice,
+    ProposalContractResult,
+    ProposalSlice,
+)
 from store.engagement_store import EngagementStore
 from store.file_engagement_store import FileEngagementStore
 
@@ -129,4 +144,53 @@ def get_engagement(
     record = store.get(engagement_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Engagement not found")
+    return record
+
+
+@app.post("/engagements/{engagement_id}/advance", response_model=EngagementRecord)
+def advance(
+    engagement_id: UUID,
+    stage: str,
+    store: Annotated[EngagementStore, Depends(get_store)],
+    proposal_runner: Annotated[ProposalRunner, Depends(get_proposal_runner)],
+) -> EngagementRecord:
+    record = store.get(engagement_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+
+    if stage != "proposal":
+        # Phase 6 adds an `elif stage == "ops":` branch here without
+        # rewriting the guard/merge shape above or below this line (D-05).
+        raise HTTPException(status_code=400, detail=f"unsupported stage '{stage}'")
+
+    if record.triage is None or record.triage.verdict != "apply":
+        raise HTTPException(
+            status_code=409,
+            detail="engagement is not apply-triaged; cannot draft a proposal",
+        )
+
+    try:
+        result: ProposalContractResult = proposal_runner(record.job)  # typed, VERBATIM merge (D-02/D-05)
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001 — /advance must never surface a raw 500
+        # Any proposal-drafting failure (botocore creds/ClientError/timeout,
+        # strands ModelThrottled/ContextWindowOverflow, or an unexpected
+        # type) maps to a readable, credential-free 503 — the deterministic
+        # default path never touches Bedrock so this only activates when
+        # PROPOSAL_BACKEND=supervisor.
+        mapped = map_bedrock_error(exc)
+        raise HTTPException(status_code=503, detail=str(mapped)) from mapped
+
+    record.proposal = ProposalSlice(
+        text=result.proposal_text,
+        needs_human_input=result.needs_human_input,
+        question=result.question,
+    )
+    if not result.needs_human_input:
+        record.contract = ContractSlice(
+            text=result.contract_text,
+            payment_schedule=result.payment_schedule,
+        )
+    store.save(record)
     return record
