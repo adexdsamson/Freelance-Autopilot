@@ -5,6 +5,7 @@
 .planning/ui-reviews/
 .claude/.gsd-staging/
 .claude/gsd-install-state.json
+.gsd/
 
 # --- Python (backend) ---
 __pycache__/
