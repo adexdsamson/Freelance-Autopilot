@@ -9,15 +9,15 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Engagement Record & Persistence
 
-- [ ] **REC-01**: A single Pydantic-typed Engagement Record models job, triage, proposal, contract, and ops slices per the PRD 6.2 shape.
-- [ ] **REC-02**: An Engagement Record is persisted per engagement to a durable store (file-based JSON or SQLite) behind a store interface, so stages invoked from separate HTTP requests share state.
-- [ ] **REC-03**: FastAPI is the sole writer that merges each specialist agent's typed output into the Engagement Record (agents do not mutate the record directly).
+- [x] **REC-01**: A single Pydantic-typed Engagement Record models job, triage, proposal, contract, and ops slices per the PRD 6.2 shape.
+- [x] **REC-02**: An Engagement Record is persisted per engagement to a durable store (file-based JSON or SQLite) behind a store interface, so stages invoked from separate HTTP requests share state.
+- [x] **REC-03**: FastAPI is the sole writer that merges each specialist agent's typed output into the Engagement Record (agents do not mutate the record directly).
 
 ### Orchestration (Strands Supervisor)
 
 - [ ] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
-- [ ] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
-- [ ] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
+- [x] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
+- [x] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
 
 ### Gig Triage (Stage 1 — autonomous)
 
@@ -28,8 +28,8 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Capture API & Endpoints
 
-- [ ] **API-01**: `POST /capture` accepts a structured job payload, runs triage via the Supervisor, writes the result to a new Engagement Record, and returns the verdict.
-- [ ] **API-02**: `GET /engagements/{id}` returns the current Engagement Record.
+- [x] **API-01**: `POST /capture` accepts a structured job payload, runs triage via the Supervisor, writes the result to a new Engagement Record, and returns the verdict.
+- [x] **API-02**: `GET /engagements/{id}` returns the current Engagement Record.
 - [ ] **API-03**: `POST /engagements/{id}/advance` advances the engagement to the next stage (proposal/contract, then ops) and returns the updated record.
 
 ### Chrome Extension (capture client)
@@ -87,17 +87,17 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REC-01 | Phase 1 | Pending |
-| REC-02 | Phase 1 | Pending |
-| REC-03 | Phase 1 | Pending |
-| ORC-03 | Phase 1 | Pending |
+| REC-01 | Phase 1 | Complete |
+| REC-02 | Phase 1 | Complete |
+| REC-03 | Phase 1 | Complete |
+| ORC-03 | Phase 1 | Complete |
 | TRI-01 | Phase 2 | Pending |
 | TRI-02 | Phase 2 | Pending |
 | TRI-03 | Phase 2 | Pending |
 | TRI-04 | Phase 2 | Pending |
-| ORC-02 | Phase 3 | Pending |
-| API-01 | Phase 3 | Pending |
-| API-02 | Phase 3 | Pending |
+| ORC-02 | Phase 3 | Complete |
+| API-01 | Phase 3 | Complete |
+| API-02 | Phase 3 | Complete |
 | CAP-01 | Phase 4 | Pending |
 | CAP-02 | Phase 4 | Pending |
 | CAP-03 | Phase 4 | Pending |
@@ -120,10 +120,11 @@ Populated during roadmap creation.
 | DEPLOY-02 (v2) | Phase 8 (optional) | Deferred |
 
 **Coverage:**
+
 - v1 requirements: 29 total (corrected from a stale count of 25 in this file's original draft — recounted directly against the REQ-IDs listed above)
 - Mapped to phases: 29/29
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-01*
-*Last updated: 2026-09-01 after roadmap creation*
+*Last updated: 2026-09-02 after Phase 3 (ORC-02, API-01, API-02 complete)*

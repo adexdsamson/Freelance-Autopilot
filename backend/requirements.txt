@@ -1,0 +1,7 @@
+strands-agents==1.54.0
+pydantic>=2.13,<3
+boto3>=1.43,<2
+fastapi>=0.141,<0.142
+uvicorn[standard]>=0.52,<0.53
+httpx
+pytest
