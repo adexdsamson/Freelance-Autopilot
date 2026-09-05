@@ -29,6 +29,12 @@ def draft_contract(title: str, description: str, proposal_text: str, budget: flo
     consistent as absolute dollars, not a fraction). Only called on the
     happy path, after check_scope_clarity has confirmed budget is present —
     budget is therefore always a real number here, never None.
+
+    WR-01: the first two milestones are independently rounded, but the
+    final milestone is derived as the REMAINDER (budget - first - second)
+    rather than independently rounded, so the three amounts are guaranteed
+    to sum exactly to `budget` — independent per-milestone rounding can
+    otherwise drift by a cent for non-round budgets (e.g. 999.99).
     """
     contract_text = (
         f"Statement of Work: {title}\n\n"
@@ -39,20 +45,23 @@ def draft_contract(title: str, description: str, proposal_text: str, budget: flo
         f"  3. Final revisions & handoff package\n\n"
         f"Payment terms: milestone-based, see payment_schedule."
     )
+    on_signing = round(budget * 0.3, 2)
+    on_delivery = round(budget * 0.5, 2)
+    final_handoff = round(budget - on_signing - on_delivery, 2)
     payment_schedule = [
         {
             "label": "On signing",
-            "amount": round(budget * 0.3, 2),
+            "amount": on_signing,
             "due_marker": "on_signing",
         },
         {
             "label": "On delivery",
-            "amount": round(budget * 0.5, 2),
+            "amount": on_delivery,
             "due_marker": "on_delivery",
         },
         {
             "label": "Final handoff",
-            "amount": round(budget * 0.2, 2),
+            "amount": final_handoff,
             "due_marker": "net_15",
         },
     ]

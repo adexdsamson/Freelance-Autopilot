@@ -57,13 +57,21 @@ def test_draft_contract_is_deterministic():
 # --- payment_schedule (PROP-03) --------------------------------------------
 
 
-def test_draft_contract_payment_schedule_items_have_required_keys_and_sum_to_budget():
-    result = draft_contract("Build a site", CLEAR_DESCRIPTION, "proposal text", 2000.0)
+@pytest.mark.parametrize(
+    "budget",
+    [
+        2000.0,  # coincidentally exact under naive independent rounding
+        999.99,  # WR-01: naive independent rounding drifts by +$0.01 here
+        333.33,  # coincidentally exact under naive independent rounding
+    ],
+)
+def test_draft_contract_payment_schedule_items_have_required_keys_and_sum_to_budget(budget):
+    result = draft_contract("Build a site", CLEAR_DESCRIPTION, "proposal text", budget)
     schedule = result["payment_schedule"]
     assert len(schedule) == 3
     for item in schedule:
         assert set(item.keys()) == {"label", "amount", "due_marker"}
-    assert round(sum(item["amount"] for item in schedule), 2) == 2000.0
+    assert round(sum(item["amount"] for item in schedule), 2) == round(budget, 2)
 
 
 def test_proposal_contract_result_coerces_payment_schedule_into_payment_milestones():
