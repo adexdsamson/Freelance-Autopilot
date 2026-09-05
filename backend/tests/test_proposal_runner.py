@@ -97,6 +97,18 @@ def test_proposal_contract_result_coerces_payment_schedule_into_payment_mileston
         (2000.0, "No timing words at all, just deliverable phases and milestones.", {"timeline"}),
         (2000.0, "Due in 6 weeks, by next month, asap.", {"deliverables"}),
         (2000.0, "Something small.", {"timeline", "deliverables"}),
+        # WR-02 regression: "nearby " must NOT satisfy the timeline signal
+        # via a false-positive "by " substring match.
+        (
+            2000.0,
+            "Looking for a nearby freelancer to build a small marketing "
+            "site with three deliverable phases and milestone reviews.",
+            {"timeline"},
+        ),
+        # WR-03 regression: a non-positive budget is treated as missing,
+        # the same as budget=None.
+        (0.0, CLEAR_DESCRIPTION, {"budget"}),
+        (-1000.0, CLEAR_DESCRIPTION, {"budget"}),
     ],
 )
 def test_check_scope_clarity_cites_exact_missing_fields(budget, description, expected_missing):
@@ -108,6 +120,18 @@ def test_check_scope_clarity_cites_exact_missing_fields(budget, description, exp
 
 def test_check_scope_clarity_clear_when_budget_timeline_and_deliverables_present():
     result = check_scope_clarity(2000.0, CLEAR_DESCRIPTION)
+    assert result == {"clear": True, "question": None}
+
+
+def test_check_scope_clarity_real_by_marker_still_satisfies_timeline_signal():
+    """WR-02: a genuine "by <date>" timeline marker (word-boundary anchored)
+    must still satisfy the timeline signal even though the bare "nearby "
+    false positive was removed."""
+    result = check_scope_clarity(
+        2000.0,
+        "Build a small marketing site with three deliverable phases, "
+        "due by friday.",
+    )
     assert result == {"clear": True, "question": None}
 
 

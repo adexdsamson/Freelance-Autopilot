@@ -20,14 +20,29 @@ backend/tests/test_single_writer.py scans backend/tools/ for store imports).
 """
 from __future__ import annotations
 
+import re
+
 from strands import tool
 
 # [ASSUMED] design-choice keyword lists (05-RESEARCH.md Assumption A1): no
 # structured timeline/deliverables fields exist on JobSlice, so these signals
 # come from a keyword scan of the free-text description — structurally
 # identical to placeholder_kill_switch_check's RED_FLAG_KEYWORDS pattern.
-TIMELINE_MARKERS = {"week", "weeks", "month", "months", "deadline", "asap", "by ", "days"}
+#
+# WR-02: markers are matched as whole words (word-boundary anchored, see
+# _contains_marker), not raw substrings — a bare "by " substring match
+# previously false-positived inside unrelated words like "nearby ",
+# "standby ", "thereby " (all contain the letters "by" followed by a
+# space), which could suppress a legitimate escalation (SC2).
+TIMELINE_MARKERS = {"week", "weeks", "month", "months", "deadline", "asap", "by", "days"}
 DELIVERABLE_MARKERS = {"deliverable", "milestone", "pages", "wireframe", "revisions", "phase"}
+
+
+def _contains_marker(text: str, markers: set[str]) -> bool:
+    """Word-boundary-anchored marker match (WR-02): `re.search(r"\\bMARKER\\b", ...)`
+    so a marker only matches a whole word, never a substring inside a larger
+    word (e.g. "by" must not match inside "nearby")."""
+    return any(re.search(rf"\b{re.escape(marker)}\b", text) for marker in markers)
 
 
 @tool
@@ -40,11 +55,16 @@ def check_scope_clarity(budget: float | None, description: str) -> dict:
     """
     lowered = (description or "").lower()
     missing: list[str] = []
-    if budget is None:
+    if budget is None or budget <= 0:
+        # WR-03: a non-positive budget (0 or negative) is treated the same
+        # as a missing budget, rather than silently accepted as "provided" —
+        # defense-in-depth so this gate's own purpose ("flags missing
+        # budget") does not solely depend on an upstream, differently-scoped
+        # rule (the triage kill-switch budget floor).
         missing.append("budget")
-    if not any(marker in lowered for marker in TIMELINE_MARKERS):
+    if not _contains_marker(lowered, TIMELINE_MARKERS):
         missing.append("timeline")
-    if not any(marker in lowered for marker in DELIVERABLE_MARKERS):
+    if not _contains_marker(lowered, DELIVERABLE_MARKERS):
         missing.append("deliverables")
 
     if missing:
