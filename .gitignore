@@ -6,6 +6,7 @@
 .claude/.gsd-staging/
 .claude/gsd-install-state.json
 .gsd/
+.planning/milestone.lock
 
 # --- Python (backend) ---
 __pycache__/
