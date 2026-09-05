@@ -112,7 +112,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. No single response contains both a fully populated contract and `needs_human_input=true` — the happy path and the escalation path are mutually exclusive outcomes of the same schema.
   4. The Engagement Record's `proposal` and `contract` slices are populated only via FastAPI's merge of the specialist's typed output, never written by the agent directly.
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+- [ ] 05-01-PLAN.md — Deterministic Proposal-Contract stage end-to-end: enriched Engagement Record (typed payment schedule + mutually-exclusive result model), three PRD §7.2 dual-use tools, `ProposalRunner` seam, `POST /engagements/{id}/advance?stage=proposal` (guards + verbatim merge + 503 fail-fast) — PROP-01..04, SC1-SC4 offline
+- [ ] 05-02-PLAN.md — Live two-agent path: distinct Proposal-Contract Agent + stage-scoped `build_proposal_supervisor` + `extract_proposal_result` (agents-as-tools, D-04); offline wiring proof + manual live Bedrock trace
 
 ### Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring
 
@@ -170,7 +173,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | 2. Gig Triage Agent (standalone) | 0/TBD | Not started | - |
 | 3. Supervisor Wiring + `/capture` Endpoint | 0/1 | Planned | - |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
-| 5. Proposal-Contract Agent + `/advance` (proposal) | 0/TBD | Not started | - |
+| 5. Proposal-Contract Agent + `/advance` (proposal) | 0/2 | Planned | - |
 | 6. Ops Agent, Fixtures & Full Supervisor Wiring | 0/TBD | Not started | - |
 | 7. Full Demo Verification & Submission Docs | 0/TBD | Not started | - |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |
