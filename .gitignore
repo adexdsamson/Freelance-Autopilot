@@ -1,9 +1,12 @@
 # --- GSD runtime / local state (keep the shareable install + planning docs, ignore local artifacts) ---
 # .planning/ is tracked (commit_docs=Yes); ignore only noisy runtime traces within it
 .planning/.gsd-trace.jsonl
+.planning/state.json
 .planning/ui-reviews/
 .claude/.gsd-staging/
 .claude/gsd-install-state.json
+.gsd/
+.planning/milestone.lock
 
 # --- Python (backend) ---
 __pycache__/
@@ -15,6 +18,7 @@ env/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+backend/data/
 
 # --- Node (extension / tooling) ---
 node_modules/
