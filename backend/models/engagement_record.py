@@ -90,6 +90,16 @@ class ProposalContractResult(BaseModel):
                     "the happy path requires proposal_text, contract_text, and "
                     "a non-empty payment_schedule"
                 )
+            if self.question:
+                # SG-01: a happy-path result (needs_human_input=False) must
+                # not also carry a stray non-None question -- otherwise
+                # api.py would merge that stray question into
+                # record.proposal.question alongside needs_human_input=False
+                # and a populated contract, a minor but avoidable data-shape
+                # inconsistency most likely to surface via the live path.
+                raise ValueError(
+                    "needs_human_input=False must not carry a non-None question"
+                )
         return self
 
 

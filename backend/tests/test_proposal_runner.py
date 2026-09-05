@@ -173,6 +173,19 @@ def test_exclusivity_rejects_neither_populated():
         ProposalContractResult(needs_human_input=False)
 
 
+def test_exclusivity_rejects_happy_path_with_stray_question():
+    """SG-01: needs_human_input=False must not carry a non-None question,
+    even when all happy-path fields are populated."""
+    with pytest.raises(ValueError):
+        ProposalContractResult(
+            needs_human_input=False,
+            question="stray question",
+            proposal_text="p",
+            contract_text="c",
+            payment_schedule=[{"label": "l", "amount": 1.0, "due_marker": "on_signing"}],
+        )
+
+
 def test_exclusivity_accepts_valid_happy_and_escalation_constructions():
     happy = ProposalContractResult(
         proposal_text="p",
