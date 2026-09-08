@@ -25,6 +25,8 @@ _VARIANT_SUFFIX = {"creep": "", "clean": "_clean"}
 def load_client_thread(variant: str = "creep") -> list[str]:
     """Load the client-thread fixture for the given variant ("creep" or
     "clean"). Returns a list of message strings."""
+    if variant not in _VARIANT_SUFFIX:
+        raise ValueError(f"unknown fixture variant {variant!r}; expected 'creep' or 'clean'")
     suffix = _VARIANT_SUFFIX[variant]
     path = _FIXTURES_DIR / f"sample_client_thread{suffix}.json"
     return json.loads(path.read_text())
@@ -34,6 +36,8 @@ def load_payment_schedule(variant: str = "creep") -> list[dict]:
     """Load the payment-schedule fixture for the given variant ("creep" or
     "clean"). Returns a list of {"label", "amount", "due_date", "paid"}
     dicts."""
+    if variant not in _VARIANT_SUFFIX:
+        raise ValueError(f"unknown fixture variant {variant!r}; expected 'creep' or 'clean'")
     suffix = _VARIANT_SUFFIX[variant]
     path = _FIXTURES_DIR / f"sample_payment_schedule{suffix}.json"
     return json.loads(path.read_text())
