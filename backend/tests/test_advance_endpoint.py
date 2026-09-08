@@ -175,6 +175,86 @@ def test_advance_ops_after_proposal_completes_both_stages(client):
     assert get_response.json()["ops"] == ops_body["ops"]
 
 
+def test_advance_ops_without_contract_returns_409(client):
+    """Pitfall 3/T-06-PT: a headless engagement (capture only, never
+    advanced through stage=proposal) must not be advanceable to ops."""
+    capture_response = client.post(
+        "/capture",
+        json={
+            "title": "Build a marketing site",
+            "description": (
+                "Standard React build with a clear scope, three deliverable "
+                "phases, and a deadline in 6 weeks."
+            ),
+            "budget": 2000.0,
+        },
+    )
+    assert capture_response.status_code == 200
+    engagement_id = capture_response.json()["engagement_id"]
+
+    response = client.post(
+        f"/engagements/{engagement_id}/advance", params={"stage": "ops"}
+    )
+    assert response.status_code == 409
+
+
+def test_advance_ops_when_proposal_escalated_returns_409(client):
+    """Pitfall 3/T-06-PT: an escalated proposal (needs_human_input=True, no
+    contract) must not be advanceable to ops."""
+    capture_response = client.post(
+        "/capture",
+        json={
+            "title": "t",
+            "description": "Looking for someone to help with ongoing design work.",
+            "budget": 500.0,
+        },
+    )
+    assert capture_response.status_code == 200
+    engagement_id = capture_response.json()["engagement_id"]
+
+    proposal_response = client.post(
+        f"/engagements/{engagement_id}/advance", params={"stage": "proposal"}
+    )
+    assert proposal_response.status_code == 200
+    assert proposal_response.json()["proposal"]["needs_human_input"] is True
+    assert proposal_response.json()["contract"] is None
+
+    response = client.post(
+        f"/engagements/{engagement_id}/advance", params={"stage": "ops"}
+    )
+    assert response.status_code == 409
+
+
+def test_advance_ops_out_of_set_fixture_returns_422(client):
+    """T-06-PT: the fixture query param is a closed Literal["creep","clean"]
+    set — an out-of-range value (e.g. a path-traversal attempt) is
+    structurally rejected with a 422, never interpolated into a path."""
+    capture_response = client.post(
+        "/capture",
+        json={
+            "title": "Build a marketing site",
+            "description": (
+                "Standard React build with a clear scope, three deliverable "
+                "phases, and a deadline in 6 weeks."
+            ),
+            "budget": 2000.0,
+        },
+    )
+    assert capture_response.status_code == 200
+    engagement_id = capture_response.json()["engagement_id"]
+
+    proposal_response = client.post(
+        f"/engagements/{engagement_id}/advance", params={"stage": "proposal"}
+    )
+    assert proposal_response.status_code == 200
+
+    response = client.post(
+        f"/engagements/{engagement_id}/advance",
+        params={"stage": "ops", "fixture": "../../etc/passwd"},
+    )
+    assert response.status_code == 422
+
+
 def test_advance_re_advance_escalation_clears_stale_contract(client):
     """CR-01 regression: re-advancing the same engagement, happy path then
     escalation, must clear the previously-persisted contract at BOTH the
