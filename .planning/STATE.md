@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-current_phase: 1
-current_phase_name: Foundations — Engagement Record & Strands/Bedrock Verification Spike
-status: planning
-stopped_at: Phase 6 context gathered
-last_updated: "2026-09-08T12:41:50.089Z"
-last_activity: 2026-09-05
-last_activity_desc: Phase 5 complete, transitioned to Phase 1
-state_head: 6e6b0e2e187b678ed39a1a0c8636bdc289026634
+current_phase: 6
+current_phase_name: Ops Agent, Fixtures & Full Supervisor Wiring
+status: executing
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-09-08T13:22:03.654Z"
+last_activity: 2026-09-08
+last_activity_desc: Phase 6 Plan 01 complete — deterministic ops stage + /advance stage=ops
+state_head: 3fc80493cb6fac3abc422e53e64545359b865e7f
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 13
 ---
 
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-01)
 
 **Core value:** A freelancer captures a real job posting and the system runs it end to end through genuine multi-agent Strands orchestration — triage verdict → proposal/contract draft → live-engagement ops flags — with human-in-the-loop escalations that are structurally justified, not decorative.
-**Current focus:** Phase 5 — Proposal-Contract Agent + /advance (stage=proposal)
+**Current focus:** Phase 6 — Ops Agent, Fixtures & Full Supervisor Wiring
 
 ## Current Position
 
-Phase: 1 — Foundations — Engagement Record & Strands/Bedrock Verification Spike
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-05 — Phase 5 complete, transitioned to Phase 1
+Phase: 6 — Ops Agent, Fixtures & Full Supervisor Wiring
+Plan: 01 of 02 complete
+Status: Plan 06-02 (unified 3-agent Supervisor, ORC-01) ready to execute
+Last activity: 2026-09-08 — Phase 6 Plan 01 complete (deterministic ops stage + /advance stage=ops)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 13%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 45min | 3 tasks | 19 files |
+| Phase 06 P01 | 25 min | 3 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Roadmap]: REQUIREMENTS.md's stated "25 total" v1 count was stale against its own 29 listed REQ-IDs; roadmap mapping and traceability use the actual 29 REQ-IDs present in the document.
 - [Roadmap]: ORC-01 (Supervisor orchestrating all three specialists) mapped to Phase 6, since it cannot be true until the third specialist exists; ORC-02 (typed-JSON, no re-authoring) mapped to Phase 3, where the pattern is first established and provable on one specialist.
 - [Phase 1]: Installed pinned strands-agents==1.54.0/pydantic/boto3/pytest via pip3 install --user (system pip blocked by Debian-managed PyJWT conflict) so the plan's literal 'python -m pytest' verify command resolves them
+- [Phase 6 P01]: check_invoice_status requires an explicit, non-defaulted reference_date (never date.today() inside the tool) and fixtures use absolute ISO due dates, so SC2/SC3 stay deterministic indefinitely without a frozen-clock dependency.
+- [Phase 6 P01]: The fixture query param on /advance is typed Literal["creep","clean"] (structural 422 on any other value) rather than validated by a runtime check, closing the path-traversal vector the same way engagement_id:UUID already does.
 
 ### Pending Todos
 
@@ -93,6 +96,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-08T12:41:49.791Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-ops-agent-fixtures-full-supervisor-wiring/06-CONTEXT.md
+Last session: 2026-09-08T13:22:03.526Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None
