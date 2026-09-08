@@ -16,15 +16,23 @@ seam, merge the typed ProposalContractResult VERBATIM into proposal (+
 contract on the happy path only, explicitly cleared to None on escalation
 so a re-advance can never leave a stale contract alongside
 needs_human_input=True (CR-01/SC3) — no re-authoring, D-02/D-05), persist
-via store.save, and return the updated record. An unsupported `stage`
-value is a 400 (T-05-03) — Phase 6 adds `stage="ops"` here without a
-rewrite.
+via store.save, and return the updated record.
+
+POST /engagements/{engagement_id}/advance?stage=ops&fixture=creep|clean:
+load the record (404 if unknown), guard that a signed contract exists and
+the proposal did not escalate (409 otherwise — Pitfall 3/T-06-PT), run the
+Ops specialist via the OpsRunner DI seam against the selected fixture
+variant, merge the typed OpsResult VERBATIM into ops, persist via
+store.save, and return the updated record (D-05). `fixture` is typed
+`Literal["creep", "clean"]` so an out-of-set value is a structural 422
+(T-06-PT), never interpolated into a filesystem path. An unsupported
+`stage` value is a 400 (T-05-03).
 
 api.py is the ONLY module in this codebase that imports the store.
 """
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
@@ -35,12 +43,15 @@ from strands.types.exceptions import (
     ModelThrottledException,
 )
 
+from agents.ops_runner import OpsRunner, get_ops_runner
 from agents.proposal_runner import ProposalRunner, get_proposal_runner
 from agents.triage_runner import TriageRunner, get_triage_runner
 from models.engagement_record import (
     ContractSlice,
     EngagementRecord,
     JobSlice,
+    OpsResult,
+    OpsSlice,
     ProposalContractResult,
     ProposalSlice,
 )
@@ -156,53 +167,86 @@ def advance(
     stage: str,
     store: Annotated[EngagementStore, Depends(get_store)],
     proposal_runner: Annotated[ProposalRunner, Depends(get_proposal_runner)],
+    ops_runner: Annotated[OpsRunner, Depends(get_ops_runner)],
+    fixture: Literal["creep", "clean"] = "creep",
 ) -> EngagementRecord:
     record = store.get(engagement_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Engagement not found")
 
-    if stage != "proposal":
-        # Phase 6 adds an `elif stage == "ops":` branch here without
-        # rewriting the guard/merge shape above or below this line (D-05).
+    if stage == "proposal":
+        if record.triage is None or record.triage.verdict != "apply":
+            raise HTTPException(
+                status_code=409,
+                detail="engagement is not apply-triaged; cannot draft a proposal",
+            )
+
+        try:
+            result: ProposalContractResult = proposal_runner(record.job)  # typed, VERBATIM merge (D-02/D-05)
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001 — /advance must never surface a raw 500
+            # Any proposal-drafting failure (botocore creds/ClientError/timeout,
+            # strands ModelThrottled/ContextWindowOverflow, or an unexpected
+            # type) maps to a readable, credential-free 503 — the deterministic
+            # default path never touches Bedrock so this only activates when
+            # PROPOSAL_BACKEND=supervisor.
+            mapped = map_bedrock_error(exc)
+            raise HTTPException(status_code=503, detail=str(mapped)) from mapped
+
+        record.proposal = ProposalSlice(
+            text=result.proposal_text,
+            needs_human_input=result.needs_human_input,
+            question=result.question,
+        )
+        if result.needs_human_input:
+            # CR-01: an escalation result must clear any stale contract from a
+            # prior /advance call on this same engagement -- otherwise the
+            # persisted record (and this response) could carry
+            # needs_human_input=True alongside a fully populated contract,
+            # violating SC3 at the persisted-record level (the schema-level
+            # validator only enforces exclusivity within a SINGLE result, not
+            # across repeated /advance calls).
+            record.contract = None
+        else:
+            record.contract = ContractSlice(
+                text=result.contract_text,
+                payment_schedule=result.payment_schedule,
+            )
+    elif stage == "ops":
+        if (
+            record.contract is None
+            or record.proposal is None
+            or record.proposal.needs_human_input
+        ):
+            # Pitfall 3 / T-06-PT: a headless engagement (no signed
+            # contract, or an escalated proposal that never produced one)
+            # must not be advanceable to ops — mirrors the stage=proposal
+            # 409 guard above.
+            raise HTTPException(
+                status_code=409,
+                detail="engagement has no signed contract; cannot run ops checks",
+            )
+
+        try:
+            ops_result: OpsResult = ops_runner(record.contract, fixture)  # typed, VERBATIM merge (D-02/D-05)
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001 — /advance must never surface a raw 500
+            # Any ops-check failure maps to a readable, credential-free 503
+            # via the SAME mapper used by the proposal branch (T-06-LEAK) —
+            # the deterministic default path never touches Bedrock so this
+            # only activates when OPS_BACKEND=supervisor.
+            mapped = map_bedrock_error(exc)
+            raise HTTPException(status_code=503, detail=str(mapped)) from mapped
+
+        record.ops = OpsSlice(
+            status_updates=[ops_result.status_update],
+            scope_creep_flags=ops_result.scope_creep_flags,
+            invoice_flags=ops_result.invoice_flags,
+        )
+    else:
         raise HTTPException(status_code=400, detail=f"unsupported stage '{stage}'")
 
-    if record.triage is None or record.triage.verdict != "apply":
-        raise HTTPException(
-            status_code=409,
-            detail="engagement is not apply-triaged; cannot draft a proposal",
-        )
-
-    try:
-        result: ProposalContractResult = proposal_runner(record.job)  # typed, VERBATIM merge (D-02/D-05)
-    except HTTPException:
-        raise
-    except Exception as exc:  # noqa: BLE001 — /advance must never surface a raw 500
-        # Any proposal-drafting failure (botocore creds/ClientError/timeout,
-        # strands ModelThrottled/ContextWindowOverflow, or an unexpected
-        # type) maps to a readable, credential-free 503 — the deterministic
-        # default path never touches Bedrock so this only activates when
-        # PROPOSAL_BACKEND=supervisor.
-        mapped = map_bedrock_error(exc)
-        raise HTTPException(status_code=503, detail=str(mapped)) from mapped
-
-    record.proposal = ProposalSlice(
-        text=result.proposal_text,
-        needs_human_input=result.needs_human_input,
-        question=result.question,
-    )
-    if result.needs_human_input:
-        # CR-01: an escalation result must clear any stale contract from a
-        # prior /advance call on this same engagement -- otherwise the
-        # persisted record (and this response) could carry
-        # needs_human_input=True alongside a fully populated contract,
-        # violating SC3 at the persisted-record level (the schema-level
-        # validator only enforces exclusivity within a SINGLE result, not
-        # across repeated /advance calls).
-        record.contract = None
-    else:
-        record.contract = ContractSlice(
-            text=result.contract_text,
-            payment_schedule=result.payment_schedule,
-        )
     store.save(record)
     return record
