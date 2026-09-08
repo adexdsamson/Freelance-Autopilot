@@ -131,10 +131,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `draft_status_update` produces a client-ready status summary that reflects whatever flags are currently active.
   5. `POST /engagements/{id}/advance` correctly routes to and completes both the `proposal` and `ops` stages, returning the updated record each time.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 
 - [x] 06-01-PLAN.md — Deterministic ops stage end-to-end: three ops tools + Stage 2–3 fixtures (creep/clean variants) + `OpsRunner` seam + typed `OpsResult`/`OpsSlice` cards + `POST /advance?stage=ops` (409 guard, `fixture` Literal, 503 fail-fast) — API-03, OPS-01..04, DEMO-01, SC2–SC5 offline
-- [ ] 06-02-PLAN.md — Unified three-specialist Supervisor: `build_ops_agent` + `build_full_supervisor` (all three specialists as agents-as-tools) + name-disambiguated `extract_ops_result` (ORC-01/SC1); offline construction + extraction proof, live four-agent trace manual
+- [x] 06-02-PLAN.md — Unified three-specialist Supervisor: `build_ops_agent` + `build_full_supervisor` (all three specialists as agents-as-tools) + name-disambiguated `extract_ops_result` (ORC-01/SC1); offline construction + extraction proof, live four-agent trace manual
 
 ### Phase 7: Full Demo Verification & Submission Docs
 
@@ -177,6 +177,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | 3. Supervisor Wiring + `/capture` Endpoint | 0/1 | Planned | - |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
 | 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete    | 2026-09-05 |
-| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 1/2 | In Progress|  |
+| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 2/2 | In Progress|  |
 | 7. Full Demo Verification & Submission Docs | 0/TBD | Not started | - |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |

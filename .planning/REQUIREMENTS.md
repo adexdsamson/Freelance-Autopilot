@@ -15,7 +15,7 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Orchestration (Strands Supervisor)
 
-- [ ] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
+- [x] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
 - [x] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
 - [x] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
 
@@ -105,7 +105,7 @@ Populated during roadmap creation.
 | PROP-02 | Phase 5 | Complete |
 | PROP-03 | Phase 5 | Complete |
 | PROP-04 | Phase 5 | Complete |
-| ORC-01 | Phase 6 | Pending |
+| ORC-01 | Phase 6 | Complete |
 | API-03 | Phase 6 | Complete |
 | OPS-01 | Phase 6 | Complete |
 | OPS-02 | Phase 6 | Complete |

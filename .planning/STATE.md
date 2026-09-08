@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 6
 current_phase_name: Ops Agent, Fixtures & Full Supervisor Wiring
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-09-08T13:22:03.654Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-09-08T13:28:24.321Z"
 last_activity: 2026-09-08
 last_activity_desc: Phase 6 Plan 01 complete — deterministic ops stage + /advance stage=ops
-state_head: 3fc80493cb6fac3abc422e53e64545359b865e7f
+state_head: cba52bac6c530217fe0b81f79688dc944fbb1c3b
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 13
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-01)
 ## Current Position
 
 Phase: 6 — Ops Agent, Fixtures & Full Supervisor Wiring
-Plan: 01 of 02 complete
+Plan: 2 of 02 complete
 Status: Plan 06-02 (unified 3-agent Supervisor, ORC-01) ready to execute
 Last activity: 2026-09-08 — Phase 6 Plan 01 complete (deterministic ops stage + /advance stage=ops)
 
@@ -60,6 +60,7 @@ Progress: [█░░░░░░░░░] 13%
 |------|----------|-------|-------|
 | Phase 01 P01 | 45min | 3 tasks | 19 files |
 | Phase 06 P01 | 25 min | 3 tasks | 20 files |
+| Phase 06 P02 | 40min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 1]: Installed pinned strands-agents==1.54.0/pydantic/boto3/pytest via pip3 install --user (system pip blocked by Debian-managed PyJWT conflict) so the plan's literal 'python -m pytest' verify command resolves them
 - [Phase 6 P01]: check_invoice_status requires an explicit, non-defaulted reference_date (never date.today() inside the tool) and fixtures use absolute ISO due dates, so SC2/SC3 stay deterministic indefinitely without a frozen-clock dependency.
 - [Phase 6 P01]: The fixture query param on /advance is typed Literal["creep","clean"] (structural 422 on any other value) rather than validated by a runtime check, closing the path-traversal vector the same way engagement_id:UUID already does.
+- [Phase 6]: extract_ops_result is a new function on a new shared _find_tool_result_json two-pass helper; extract_triage_result/extract_proposal_result left untouched (D-01 safest reading).
+- [Phase 6]: build_full_supervisor() is purely additive alongside build_supervisor/build_proposal_supervisor -- proven by a prohibition test asserting neither stage-scoped supervisor mutated.
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-08T13:22:03.526Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-09-08T13:28:24.206Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
