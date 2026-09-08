@@ -782,10 +782,16 @@ the installed `strands-agents==1.54.0` version is identical to what Phase 5 veri
 CONTEXT.md's "Claude's Discretion" scope, not compliance/security/retention-type claims requiring
 separate user sign-off.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> Both discretionary points were resolved in planning by adopting the recommendation below:
+> Q1 → RESOLVED in 06-02-PLAN.md Task 1 (leave existing extractors untouched; add `extract_ops_result`
+> calling the new shared `_find_tool_result_json` helper). Q2 → RESOLVED in 06-01-PLAN.md Task 1 /
+> 06-02-PLAN.md Task 1 (mirror `_supervisor_proposal_runner`'s `model_dump_json()` prompt shape; let
+> `ops_agent`'s own tools load fixture data via the loader).
 
 1. **Should `extract_triage_result`/`extract_proposal_result` be refactored to call the new shared
-   `_find_tool_result_json` helper, or left untouched?**
+   `_find_tool_result_json` helper, or left untouched?** — RESOLVED (06-02 Task 1: left untouched)
    - What we know: D-01 says "keep the Phase-3/5 stage-scoped build_supervisor/build_proposal_supervisor
      intact (do not delete them)" — this is about the *supervisor builders*, not explicitly about the
      extractor functions' internals.
@@ -796,7 +802,8 @@ separate user sign-off.
      helper. This is what Pattern 5 above assumes.
 
 2. **Does the live-path `_supervisor_ops_runner` need the actual signed contract text passed into the
-   supervisor prompt, or just a reference to "the current engagement's ops checks"?**
+   supervisor prompt, or just a reference to "the current engagement's ops checks"?** — RESOLVED (mirror
+   the existing `model_dump_json()` prompt shape; tools load fixture data via the loader)
    - What we know: the deterministic path's `OpsRunner.__call__` signature takes `(contract:
      ContractSlice, fixture: str)` per this research's Pattern 4/§"Standard Stack".
    - What's unclear: the exact natural-language prompt string for the live path (mirrors
