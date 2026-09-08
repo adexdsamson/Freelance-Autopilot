@@ -78,13 +78,29 @@ def _supervisor_ops_runner(contract: ContractSlice, fixture: str) -> OpsResult:
     extract_ops_result are authored in Plan 06-02; this lazy import keeps
     this module importable (and this function's Protocol conformance
     checkable) without Plan 06-02's code existing yet.
+
+    Loads the SAME fixture data and computes the SAME reference_date at
+    this call site as _deterministic_ops_runner above, and inlines them
+    into the prompt (mirroring how the proposal-stage supervisor runner
+    inlines job.model_dump_json()) — otherwise the Ops specialist's
+    registered tools (check_scope_creep/check_invoice_status) have no
+    source for their required thread_messages/payment_schedule/
+    reference_date arguments and the live path cannot produce a
+    fixture-grounded result.
     """
     from agents.supervisor import build_full_supervisor, extract_ops_result
 
+    thread_messages = load_client_thread(fixture)
+    payment_schedule = load_payment_schedule(fixture)
+    reference_date = date.today().isoformat()
+
     supervisor = build_full_supervisor()
     supervisor(
-        "Run ops checks for this signed contract and fixture data: "
-        f"{contract.model_dump_json()}, fixture={fixture}"
+        "Run ops checks for this signed contract.\n"
+        f"contract={contract.model_dump_json()}\n"
+        f"thread_messages={thread_messages!r}\n"
+        f"payment_schedule={payment_schedule!r}\n"
+        f"reference_date={reference_date!r}"
     )
     return extract_ops_result(supervisor.messages)
 
