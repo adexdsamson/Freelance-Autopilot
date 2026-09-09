@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Freelance Autopilot — Capture",
+  "version": "0.1.0",
+  "description": "Paste a job posting and get a triage verdict from the Freelance Autopilot agent pipeline.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Freelance Autopilot"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": ["http://localhost:8000/*"]
+}
