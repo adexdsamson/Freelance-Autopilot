@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 2
-current_phase_name: Gig Triage Agent (standalone)
+current_phase: 4
+current_phase_name: Chrome Extension Capture UI
 status: complete
-stopped_at: Phase 2 complete (TRI-01..04); ready for Phase 3
-last_updated: "2026-09-02T00:00:00.000Z"
-last_activity: 2026-09-02
-last_activity_desc: Phase 2 executed — Gig Triage Agent (deterministic gate + LLM scorecard) delivered standalone; 106 backend tests passing
+stopped_at: Phase 4 complete (CAP-01..03) against a stubbed /capture; Phase 3 still outstanding
+last_updated: "2026-09-09T00:00:00.000Z"
+last_activity: 2026-09-09
+last_activity_desc: Phase 4 executed out of order — MV3 capture extension delivered and verified against a stub /capture; 117 tests passing
 state_head: 8b222fd80dfad3c84eea4d74e7096cbaf40878d3
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 3
-  percent: 13
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 6
+  percent: 25
 ---
 
 # Project State
@@ -27,12 +27,12 @@ See: .planning/PROJECT.md (updated 2026-09-01)
 
 ## Current Position
 
-Phase: 2 of 8 (Gig Triage Agent (standalone))
+Phase: 4 of 8 (Chrome Extension Capture UI) — executed ahead of Phase 3
 Plan: 3 of 3 in current phase
-Status: Complete — ready for Phase 3 (Supervisor wiring + /capture)
-Last activity: 2026-09-02 — Phase 2 executed; Gig Triage Agent delivered standalone
+Status: Complete against a stub — Phase 3 (Supervisor wiring + /capture) is the outstanding gap
+Last activity: 2026-09-09 — Phase 4 executed; MV3 capture extension delivered
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -78,6 +78,10 @@ None yet.
 
 ### Blockers/Concerns
 
+- [Phase 3 → BLOCKING]: Phase 3 was skipped. `/capture` does not exist, so Phase 4's extension talks to
+  `extension/dev/stub_capture_server.py`. Phase 4's cold-start criterion is verified structurally but never
+  observed in real Chrome against a real endpoint. Build Phase 3, then re-run Phase 4 test 2 for real and
+  delete the stub. Contract the extension already expects is in 04-SUMMARY.md "Handoff to Phase 3".
 - [Phase 2 → demo]: `llm_scorecard` has never run against live Bedrock — this machine has no usable AWS
   credentials. All deterministic behaviour around it is tested; the live round trip (model id resolving in
   the configured region, Claude filling `ScorecardJudgment` cleanly) is not. Run
