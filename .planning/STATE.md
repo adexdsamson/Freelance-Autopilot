@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-current_phase: 6
-current_phase_name: Ops Agent, Fixtures & Full Supervisor Wiring
+current_phase: 7
+current_phase_name: Full Demo Verification & Submission Docs
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-09-08T13:28:24.321Z"
-last_activity: 2026-09-08
-last_activity_desc: Phase 6 Plan 01 complete — deterministic ops stage + /advance stage=ops
-state_head: cba52bac6c530217fe0b81f79688dc944fbb1c3b
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-09-09T21:36:18.877Z"
+last_activity: 2026-09-09
+last_activity_desc: Phase 7 Plan 01 complete — run_demo.py tracer, demo determinism proof, REC-03 guard hardened for backend/scripts/
+state_head: 7140a9e07db90fef35f41720fa68413c2d0c1d2b
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 13
 ---
 
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-01)
 
 **Core value:** A freelancer captures a real job posting and the system runs it end to end through genuine multi-agent Strands orchestration — triage verdict → proposal/contract draft → live-engagement ops flags — with human-in-the-loop escalations that are structurally justified, not decorative.
-**Current focus:** Phase 6 — Ops Agent, Fixtures & Full Supervisor Wiring
+**Current focus:** Phase 7 — Full Demo Verification & Submission Docs
 
 ## Current Position
 
-Phase: 6 — Ops Agent, Fixtures & Full Supervisor Wiring
-Plan: 2 of 02 complete
-Status: Plan 06-02 (unified 3-agent Supervisor, ORC-01) ready to execute
-Last activity: 2026-09-08 — Phase 6 Plan 01 complete (deterministic ops stage + /advance stage=ops)
+Phase: 7 — Full Demo Verification & Submission Docs
+Plan: 1 of 2 complete
+Status: Plan 07-02 (README, LICENSE, architecture diagram, demo script, submission-presence tests) ready to execute
+Last activity: 2026-09-09 — Phase 7 Plan 01 complete (run_demo.py tracer, demo determinism proof, REC-03 guard hardened for backend/scripts/)
 
 Progress: [█░░░░░░░░░] 13%
 
@@ -61,6 +61,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 01 P01 | 45min | 3 tasks | 19 files |
 | Phase 06 P01 | 25 min | 3 tasks | 20 files |
 | Phase 06 P02 | 40min | 2 tasks | 3 files |
+| Phase 07 P01 | 5min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Recent decisions affecting current work:
 - [Phase 6 P01]: The fixture query param on /advance is typed Literal["creep","clean"] (structural 422 on any other value) rather than validated by a runtime check, closing the path-traversal vector the same way engagement_id:UUID already does.
 - [Phase 6]: extract_ops_result is a new function on a new shared _find_tool_result_json two-pass helper; extract_triage_result/extract_proposal_result left untouched (D-01 safest reading).
 - [Phase 6]: build_full_supervisor() is purely additive alongside build_supervisor/build_proposal_supervisor -- proven by a prohibition test asserting neither stage-scoped supervisor mutated.
+- [Phase 6]: Demo determinism proof uses curated decision-field dict, excluding engagement_id and invoice_flags[].days_overdue, to avoid day-boundary flakiness — Full model_dump() equality would flake across a day boundary since days_overdue is wall-clock derived
 
 ### Pending Todos
 
@@ -99,6 +101,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-08T13:28:24.206Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-09-09T21:36:18.758Z
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None

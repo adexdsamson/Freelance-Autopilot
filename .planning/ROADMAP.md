@@ -149,9 +149,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The repo root has a visible OSI license (MIT or Apache-2.0) and a README with clear setup and run instructions.
   4. An architecture diagram matching the actual object graph and a `docs/demo-script.md` are both present in the repository.
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
-- [ ] 07-01-PLAN.md — TRACER: deterministic end-to-end demo entrypoint (`backend/scripts/run_demo.py`) + 3x determinism proof + REC-03 guard hardened to cover `backend/scripts/` (DEMO-02)
+- [x] 07-01-PLAN.md — TRACER: deterministic end-to-end demo entrypoint (`backend/scripts/run_demo.py`) + 3x determinism proof + REC-03 guard hardened to cover `backend/scripts/` (DEMO-02)
 - [ ] 07-02-PLAN.md — Submission docs: repo-root README + MIT LICENSE, `docs/architecture.md` (Mermaid, real object graph) + `docs/demo-script.md`, and a presence test (DEMO-03/04/05)
 
 ### Phase 8: AgentCore Deployment (optional, cut-first)
@@ -181,5 +181,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
 | 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete    | 2026-09-05 |
 | 6. Ops Agent, Fixtures & Full Supervisor Wiring | 2/2 | In Progress|  |
-| 7. Full Demo Verification & Submission Docs | 0/2 | Planned | - |
+| 7. Full Demo Verification & Submission Docs | 1/2 | In Progress|  |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |
