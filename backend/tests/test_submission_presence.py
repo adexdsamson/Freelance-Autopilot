@@ -15,6 +15,7 @@ Presence/substring checking only — no ast, no import-graph analysis (that
 pattern is specific to test_single_writer.py's need to detect store
 imports).
 """
+import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]  # backend/tests -> backend -> repo root
@@ -31,12 +32,16 @@ def test_license_file_exists_at_repo_root():
 
 
 def test_readme_exists_with_required_sections():
-    """DEMO-03/D-07(c): a repo-root README.md with Setup/Run/Test sections."""
+    """DEMO-03/D-07(c): a repo-root README.md with actual Setup/Run/Test
+    headings — not just an incidental substring occurrence anywhere in
+    prose (e.g. "TestClient", "latest", "attest" all contain "test")."""
     readme_path = REPO_ROOT / "README.md"
     assert readme_path.exists(), f"expected README.md at repo root: {readme_path}"
-    text_lower = readme_path.read_text().lower()
-    for heading in ("setup", "run", "test"):
-        assert heading in text_lower, f"README.md is missing a '{heading}' section"
+    text = readme_path.read_text()
+    for heading in ("Setup", "Run", "Test"):
+        assert re.search(rf"^#{{1,6}}\s*{heading}\b", text, re.MULTILINE | re.IGNORECASE), (
+            f"README.md is missing a '## {heading}' heading"
+        )
 
 
 def test_architecture_doc_has_mermaid_block():
