@@ -1,16 +1,21 @@
-"""Enforces REC-03 / D-05: no module under agents/ or tools/ may import the
-store. Only FastAPI (the API layer, later phases) is allowed to call
-EngagementStore.save — agents/tools return typed data and never touch
-persistence directly. This is a static/import-graph check via Python's
-`ast` module, not a regex/text search (a grep-equivalent would false-positive
-on docstrings/comments that merely mention "store" and miss aliased or
-dynamic imports).
+"""Enforces REC-03 / D-05: no module under agents/, tools/, fixtures/, or
+scripts/ may import the store. Only FastAPI (the API layer, later phases) is
+allowed to call EngagementStore.save — agents/tools return typed data and
+never touch persistence directly. This is a static/import-graph check via
+Python's `ast` module, not a regex/text search (a grep-equivalent would
+false-positive on docstrings/comments that merely mention "store" and miss
+aliased or dynamic imports).
+
+T-07-STORE (Phase 7): "scripts" is included in SCAN_DIRS so this guard now
+also machine-enforces REC-03 for backend/scripts/run_demo.py and every
+future script — a demo/utility script must reach persistence ONLY through
+api.py's HTTP routes, never by importing the store directly.
 """
 import ast
 from pathlib import Path
 
 FORBIDDEN_MODULE_PREFIXES = ("store", "backend.store")
-SCAN_DIRS = ["agents", "tools", "fixtures"]
+SCAN_DIRS = ["agents", "tools", "fixtures", "scripts"]
 
 
 def _imported_module_names(py_file: Path) -> set[str]:
