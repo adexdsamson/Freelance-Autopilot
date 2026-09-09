@@ -21,7 +21,9 @@ This script does NOT do two things:
 from __future__ import annotations
 
 import argparse
+import sys
 
+import httpx
 from fastapi.testclient import TestClient
 
 from api import app
@@ -50,6 +52,22 @@ def build_client() -> TestClient:
     return TestClient(app)
 
 
+def _raise_for_status_or_exit(response: httpx.Response) -> None:
+    """IN-02: guard raise_for_status() so an unexpected non-2xx response
+    (e.g. a 409/404 from a stale/reused backend/data/engagements/
+    directory) prints a clean FATAL message to stderr and exits 1, instead
+    of crashing the recorded demo with a raw Python traceback."""
+    try:
+        response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        print(
+            f"FATAL: {exc.request.url} returned {exc.response.status_code}: "
+            f"{exc.response.text}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def run_pipeline(client: TestClient, fixture: str, ambiguous: bool) -> None:
     """Run capture -> proposal -> ops and print the progression. Mirrors the
     verified sequence in test_advance_endpoint.py (lines 106-176)."""
@@ -57,7 +75,7 @@ def run_pipeline(client: TestClient, fixture: str, ambiguous: bool) -> None:
 
     print(f"=== STEP 1: POST /capture ({'ambiguous' if ambiguous else 'clear-scope'} job) ===")
     capture_response = client.post("/capture", json=job)
-    capture_response.raise_for_status()
+    _raise_for_status_or_exit(capture_response)
     capture_body = capture_response.json()
     engagement_id = capture_body["engagement_id"]
     print(f"triage verdict: {capture_body['verdict']}")
@@ -68,7 +86,7 @@ def run_pipeline(client: TestClient, fixture: str, ambiguous: bool) -> None:
     proposal_response = client.post(
         f"/engagements/{engagement_id}/advance", params={"stage": "proposal"}
     )
-    proposal_response.raise_for_status()
+    _raise_for_status_or_exit(proposal_response)
     proposal_body = proposal_response.json()
     proposal = proposal_body["proposal"]
     contract = proposal_body["contract"]
@@ -91,7 +109,7 @@ def run_pipeline(client: TestClient, fixture: str, ambiguous: bool) -> None:
         f"/engagements/{engagement_id}/advance",
         params={"stage": "ops", "fixture": fixture},
     )
-    ops_response.raise_for_status()
+    _raise_for_status_or_exit(ops_response)
     ops_body = ops_response.json()
     ops = ops_body["ops"]
     ops_cards = len(ops["scope_creep_flags"]) + len(ops["invoice_flags"])
@@ -123,8 +141,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    client = build_client()
-    run_pipeline(client, args.fixture, args.ambiguous)
+    with build_client() as client:
+        run_pipeline(client, args.fixture, args.ambiguous)
 
 
 if __name__ == "__main__":
