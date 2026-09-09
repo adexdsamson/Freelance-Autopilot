@@ -38,12 +38,12 @@ flowchart TD
     ops_runner -->|"default: OPS_BACKEND=placeholder"| det_ops["_deterministic_ops_runner<br/>-> check_scope_creep / check_invoice_status / draft_status_update"]
     ops_runner -->|"OPS_BACKEND=supervisor (manual-only)"| sup_ops["_supervisor_ops_runner<br/>-> build_full_supervisor()"]
 
-    sup_triage --> full_sup
-    sup_prop --> full_sup
-    sup_ops --> full_sup["agents/supervisor.py<br/>build_full_supervisor()<br/>(agents-as-tools, ORC-01)"]
+    sup_triage --> triage_agent["gig_triage_agent<br/>(agents/gig_triage_agent.py)"]
+    sup_prop --> prop_agent["proposal_contract_agent<br/>(agents/proposal_contract_agent.py)"]
 
-    full_sup --> triage_agent["gig_triage_agent<br/>(agents/gig_triage_agent.py)"]
-    full_sup --> prop_agent["proposal_contract_agent<br/>(agents/proposal_contract_agent.py)"]
+    sup_ops --> full_sup["agents/supervisor.py<br/>build_full_supervisor()<br/>(agents-as-tools, ORC-01)"]
+    full_sup --> triage_agent
+    full_sup --> prop_agent
     full_sup --> ops_agent["ops_agent<br/>(agents/ops_agent.py)"]
 
     triage_agent -.->|"live only"| bedrock["Amazon Bedrock<br/>(Claude, via BedrockModel)"]
@@ -66,7 +66,7 @@ flowchart TD
 | FastAPI app | `backend/api.py` | Exposes `/capture`, `GET /engagements/{id}`, `/advance?stage=proposal\|ops`; the **sole** `EngagementStore` writer (REC-03) |
 | Demo driver | `backend/scripts/run_demo.py` | `TestClient(app)`-driven CLI that runs the full pipeline in-process, no live server, no AWS creds required |
 | TriageRunner / ProposalRunner / OpsRunner | `backend/agents/{triage_runner,proposal_runner,ops_runner}.py` | Dependency-injection seams FastAPI calls; each has a deterministic default path and a `*_BACKEND=supervisor` live path |
-| Supervisor | `backend/agents/supervisor.py` (`build_full_supervisor`) | Unified Strands Supervisor orchestrating all three specialists as agents-as-tools (ORC-01) — used by the live path only |
+| Supervisors | `backend/agents/supervisor.py` (`build_supervisor`, `build_proposal_supervisor`, `build_full_supervisor`) | Three SEPARATE, stage-scoped Supervisor builders (agents-as-tools, ORC-01) — `build_supervisor()` wraps only `gig_triage_agent`, `build_proposal_supervisor()` wraps only `proposal_contract_agent`, and `build_full_supervisor()` wraps all three specialists; only the ops-stage live path uses `build_full_supervisor()`. Each is used by the live path only |
 | Specialist agents | `agents/gig_triage_agent.py`, `agents/proposal_contract_agent.py`, `agents/ops_agent.py` | The three specialists the Supervisor wraps; reach Amazon Bedrock only on the live path |
 | Fixture loader | `backend/fixtures/loader.py` | Pure-data loader (`load_client_thread`, `load_payment_schedule`) feeding the deterministic ops path |
 | Persistence | `backend/store/engagement_store.py` (`EngagementStore` ABC), `backend/store/file_engagement_store.py` (`FileEngagementStore`) | The single persistence interface + its one concrete JSON-file implementation, written to only by `api.py` |

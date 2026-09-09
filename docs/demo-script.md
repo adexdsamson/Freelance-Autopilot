@@ -51,13 +51,11 @@ clarifying `question` — no contract is drafted, and the ops stage is skipped e
 because there is no signed contract to run ops checks against. The final
 `SUMMARY scenario=ambiguous ... proposal=needs_human_input` line confirms this.
 
-## Beat 4 — Live four-agent Bedrock trace (manual step, not recorded by default)
+## Beat 4 — Live Bedrock trace (manual step, not recorded by default)
 
 Everything above runs the deterministic default backends — fully offline, no AWS
-credentials needed. To additionally show the real Supervisor routing to all three
-Bedrock-backed specialist agents (four distinct, independently traceable agent
-invocations: the Supervisor plus the three specialists it wraps), configure AWS
-credentials via the standard boto3 chain and export:
+credentials needed. To additionally show the real Supervisor-routed specialist agents on
+Bedrock, configure AWS credentials via the standard boto3 chain and export:
 
 ```bash
 export TRIAGE_BACKEND=supervisor
@@ -66,10 +64,16 @@ export OPS_BACKEND=supervisor
 ```
 
 Then re-run any of the beats above (e.g. `cd backend && python3 -m scripts.run_demo
---fixture creep`) to exercise the same pipeline against live Amazon Bedrock. This mirrors
-the connectivity check in `backend/scripts/smoke_test_bedrock_connectivity.py`. This step
-is manual-verification-only and is never exercised by the automated test suite — no
-credential literal is required or referenced by this script.
+--fixture creep`) to exercise the same pipeline against live Amazon Bedrock. Each stage
+independently routes through its own stage-scoped Supervisor: the triage stage's
+`build_supervisor()` and the proposal stage's `build_proposal_supervisor()` each wrap only
+their own single specialist, and only the ops stage's Supervisor (`build_full_supervisor()`)
+has all three specialists registered as tools — though its system prompt still restricts it
+to calling exactly one specialist tool per turn, so no single advance ever invokes more than
+one specialist. This mirrors the connectivity check in
+`backend/scripts/smoke_test_bedrock_connectivity.py`. This step is manual-verification-only
+and is never exercised by the automated test suite — no credential literal is required or
+referenced by this script.
 
 ## Wrap-up (~30s)
 
