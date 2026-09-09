@@ -29,6 +29,12 @@ CLEAR_SCOPE_JOB = {
     "budget": 2000.0,
 }
 
+AMBIGUOUS_JOB = {
+    "title": "t",
+    "description": "Looking for someone to help with ongoing design work.",
+    "budget": 500.0,
+}
+
 
 def _curated_decision_fields(ops_body: dict) -> dict:
     """Extract ONLY the deterministic decision fields from an /advance
@@ -75,6 +81,23 @@ def test_full_fixture_set_is_deterministic_across_three_runs(client):
     for fixture in ("creep", "clean"):
         runs = [_run_once(client, fixture) for _ in range(3)]
         assert runs[0] == runs[1] == runs[2]
+
+
+def test_ambiguous_escalation_is_deterministic_across_three_runs(client):
+    """DEMO-02/SC2/D-02: Beat 3's `--ambiguous` proposal-stage escalation
+    (AMBIGUOUS_JOB, the same shape run_demo.py uses) is machine-verified
+    deterministic across three independent runs, not just manually
+    inspected."""
+    runs = []
+    for _ in range(3):
+        capture = client.post("/capture", json=AMBIGUOUS_JOB)
+        assert capture.status_code == 200
+        eid = capture.json()["engagement_id"]
+        resp = client.post(f"/engagements/{eid}/advance", params={"stage": "proposal"})
+        assert resp.status_code == 200
+        body = resp.json()["proposal"]
+        runs.append({"needs_human_input": body["needs_human_input"], "question": body["question"]})
+    assert runs[0] == runs[1] == runs[2]
 
 
 def test_pipeline_populates_all_stage_slices(client):
