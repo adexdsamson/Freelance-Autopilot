@@ -40,10 +40,10 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Proposal-Contract (Stage 2 — escalates on ambiguity)
 
-- [ ] **PROP-01**: `draft_proposal` generates a phased-scope proposal for an `apply` engagement.
-- [ ] **PROP-02**: `draft_contract` generates a contract (SOW with enumerable deliverables + milestones + payment terms).
-- [ ] **PROP-03**: A structured payment schedule is produced alongside the contract.
-- [ ] **PROP-04**: `check_scope_clarity` flags missing budget, timeline, or deliverables, and the agent returns `needs_human_input` + a specific `question` rather than guessing when scope/budget is ambiguous.
+- [x] **PROP-01**: `draft_proposal` generates a phased-scope proposal for an `apply` engagement.
+- [x] **PROP-02**: `draft_contract` generates a contract (SOW with enumerable deliverables + milestones + payment terms).
+- [x] **PROP-03**: A structured payment schedule is produced alongside the contract.
+- [x] **PROP-04**: `check_scope_clarity` flags missing budget, timeline, or deliverables, and the agent returns `needs_human_input` + a specific `question` rather than guessing when scope/budget is ambiguous.
 
 ### Ops (Stage 3 — escalates on creep / overdue)
 
@@ -101,10 +101,10 @@ Populated during roadmap creation.
 | CAP-01 | Phase 4 | Pending |
 | CAP-02 | Phase 4 | Pending |
 | CAP-03 | Phase 4 | Pending |
-| PROP-01 | Phase 5 | Pending |
-| PROP-02 | Phase 5 | Pending |
-| PROP-03 | Phase 5 | Pending |
-| PROP-04 | Phase 5 | Pending |
+| PROP-01 | Phase 5 | Complete |
+| PROP-02 | Phase 5 | Complete |
+| PROP-03 | Phase 5 | Complete |
+| PROP-04 | Phase 5 | Complete |
 | ORC-01 | Phase 6 | Pending |
 | API-03 | Phase 6 | Pending |
 | OPS-01 | Phase 6 | Pending |
