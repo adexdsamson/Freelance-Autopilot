@@ -21,10 +21,10 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Gig Triage (Stage 1 — autonomous)
 
-- [ ] **TRI-01**: `extract_job_fields` produces structured fields (title, description, budget, client stats) from raw pasted job text/URL.
-- [ ] **TRI-02**: `kill_switch_check` is a deterministic gate applying budget floor, red-flag keywords, and client spend/hire-rate thresholds.
-- [ ] **TRI-03**: `llm_scorecard` reasons over fit, competition, and rate reasonableness to produce a score and reasoning.
-- [ ] **TRI-04**: The Gig Triage Agent returns `{ verdict (apply|skip), score, reasoning, extracted_fields }` fully autonomously with no escalation.
+- [x] **TRI-01**: `extract_job_fields` produces structured fields (title, description, budget, client stats) from raw pasted job text/URL.
+- [x] **TRI-02**: `kill_switch_check` is a deterministic gate applying budget floor, red-flag keywords, and client spend/hire-rate thresholds.
+- [x] **TRI-03**: `llm_scorecard` reasons over fit, competition, and rate reasonableness to produce a score and reasoning.
+- [x] **TRI-04**: The Gig Triage Agent returns `{ verdict (apply|skip), score, reasoning, extracted_fields }` fully autonomously with no escalation.
 
 ### Capture API & Endpoints
 
@@ -91,10 +91,10 @@ Populated during roadmap creation.
 | REC-02 | Phase 1 | Complete |
 | REC-03 | Phase 1 | Complete |
 | ORC-03 | Phase 1 | Complete |
-| TRI-01 | Phase 2 | Pending |
-| TRI-02 | Phase 2 | Pending |
-| TRI-03 | Phase 2 | Pending |
-| TRI-04 | Phase 2 | Pending |
+| TRI-01 | Phase 2 | Complete |
+| TRI-02 | Phase 2 | Complete |
+| TRI-03 | Phase 2 | Complete |
+| TRI-04 | Phase 2 | Complete |
 | ORC-02 | Phase 3 | Complete |
 | API-01 | Phase 3 | Complete |
 | API-02 | Phase 3 | Complete |
