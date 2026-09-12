@@ -1,15 +1,33 @@
-"""The Gig Triage Agent — Stage 1 specialist (TRI-04).
+"""The Gig Triage Agent — Stage 1 specialist.
 
-Fully autonomous by design: it always returns a verdict and never asks a
-human anything. `TriageResult` has no escalation fields and forbids extras,
-so that autonomy is structural rather than a convention someone can drift
-from. Stage 2's Proposal-Contract Agent is where escalation becomes a
+This module carries two things that arrived from two phases and are both kept:
+
+1. The **real** Stage 1 specialist (Phase 2, TRI-01..04): `GigTriageAgent` /
+   `run_triage`, a deterministic driver over the real
+   `extract_job_fields` / `kill_switch_check` / `llm_scorecard` tools that
+   always returns a `TriageResult` and never escalates.
+2. The **Supervisor-facing builder** (Phase 3, ORC-02): `build_gig_triage_agent`,
+   which constructs the Strands `Agent` the Supervisor wraps agents-as-tools on
+   the live `TRIAGE_BACKEND=supervisor` path.
+
+Both are preserved deliberately. Phase 2's tests import `GigTriageAgent` /
+`run_triage`; Phase 3's `agents/supervisor.py` imports `build_gig_triage_agent`.
+Wiring the Supervisor path onto Phase 2's `run_triage` (replacing the
+placeholder gate) is a follow-up integration behind the existing
+`TriageRunner` seam, intentionally out of scope for this merge.
+
+This module must never import the store (REC-03/D-05).
+
+Fully autonomous by design: the specialist always returns a verdict and never
+asks a human anything. `TriageResult` has no escalation fields and forbids
+extras, so that autonomy is structural rather than a convention someone can
+drift from. Stage 2's Proposal-Contract Agent is where escalation becomes a
 first-class outcome.
 
 Why a deterministic driver instead of an Agent with tools=[...]
 ----------------------------------------------------------------
 Phase 1 (D-07) established agents-as-tools as the orchestration mechanism,
-and Phase 3 will wrap `run_triage` in an `@tool` so the Supervisor calls this
+and Phase 3 wraps `run_triage` in an `@tool` so the Supervisor calls this
 specialist exactly that way. Inside the specialist, though, the three steps
 run in a fixed Python sequence rather than being handed to a model to order,
 for three reasons:
@@ -26,12 +44,17 @@ The LLM judgement is not diminished by this: `llm_scorecard` runs a real
 Bedrock-backed `Agent` with `structured_output`, and that call is a genuine,
 independently traceable Agent invocation -- the second one Phase 3's success
 criteria look for.
-
-This module must never import the store (REC-03/D-05).
 """
 from __future__ import annotations
 
+import os
+
+from strands import Agent
+from strands.models import BedrockModel
+
+from models.engagement_record import TriageSlice
 from models.triage import ExtractedJobFields, KillSwitchResult, Scorecard, TriageResult
+from tools.placeholder_triage import placeholder_kill_switch_check
 from tools.triage_config import APPLY_SCORE_THRESHOLD
 from tools.triage_tools import extract_job_fields, kill_switch_check, llm_scorecard
 
@@ -108,3 +131,29 @@ def run_triage(raw_text: str) -> TriageResult:
     This is the callable Phase 3 wraps in an `@tool` for the Supervisor.
     """
     return GigTriageAgent().run(raw_text)
+
+
+# --- Phase 3 (ORC-02): Supervisor-facing placeholder builder -----------------
+# Constructs (does not invoke) the Strands Agent the Supervisor wraps
+# agents-as-tools on the live TRIAGE_BACKEND=supervisor path. Construction
+# performs NO network call (Pitfall 2, RESEARCH.md) -- only invoking the
+# returned Agent touches Bedrock, which is what lets the offline construction
+# test pass without AWS credentials.
+
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.anthropic.claude-sonnet-4-6")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+
+
+def build_gig_triage_agent() -> Agent:
+    """Construct (do not invoke) the Gig Triage specialist Agent."""
+    return Agent(
+        name="gig_triage_agent",
+        model=BedrockModel(model_id=MODEL_ID, region_name=REGION),
+        system_prompt=(
+            "You are the Gig Triage specialist (Phase 2 placeholder). Call "
+            "placeholder_kill_switch_check with the job's budget and "
+            "description, then return its result."
+        ),
+        tools=[placeholder_kill_switch_check],
+        structured_output_model=TriageSlice,
+    )
