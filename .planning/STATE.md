@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 7
-current_phase_name: Full Demo Verification & Submission Docs
-status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-09-09T21:42:44.799Z"
+current_phase: 4
+current_phase_name: Chrome Extension Capture UI
+status: complete
+stopped_at: Phase 4 complete (CAP-01..03) against a stubbed /capture; Phase 3 still outstanding
+last_updated: "2026-09-09T00:00:00.000Z"
 last_activity: 2026-09-09
-last_activity_desc: Phase 7 Plan 01 complete — run_demo.py tracer, demo determinism proof, REC-03 guard hardened for backend/scripts/
-state_head: 24f1bb749e2dcee6a80305ed268c92adbe9d83b2
+last_activity_desc: Phase 4 executed out of order — MV3 capture extension delivered and verified against a stub /capture; 117 tests passing
+state_head: 8b222fd80dfad3c84eea4d74e7096cbaf40878d3
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 8
-  completed_plans: 7
-  percent: 13
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 6
+  percent: 25
 ---
 
 # Project State
@@ -23,22 +23,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-01)
 
 **Core value:** A freelancer captures a real job posting and the system runs it end to end through genuine multi-agent Strands orchestration — triage verdict → proposal/contract draft → live-engagement ops flags — with human-in-the-loop escalations that are structurally justified, not decorative.
-**Current focus:** Phase 7 — Full Demo Verification & Submission Docs
+**Current focus:** Phase 1 — Foundations: Engagement Record & Strands/Bedrock Verification Spike
 
 ## Current Position
 
-Phase: 7 — Full Demo Verification & Submission Docs
-Plan: 2 of 2 complete
-Status: Plan 07-02 (README, LICENSE, architecture diagram, demo script, submission-presence tests) ready to execute
-Last activity: 2026-09-09 — Phase 7 Plan 01 complete (run_demo.py tracer, demo determinism proof, REC-03 guard hardened for backend/scripts/)
+Phase: 4 of 8 (Chrome Extension Capture UI) — executed ahead of Phase 3
+Plan: 3 of 3 in current phase
+Status: Complete against a stub — Phase 3 (Supervisor wiring + /capture) is the outstanding gap
+Last activity: 2026-09-09 — Phase 4 executed; MV3 capture extension delivered
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 2
+- Total plans completed: 0
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -46,7 +46,7 @@ Progress: [█░░░░░░░░░] 13%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 5 | 2 | - | - |
+| - | - | - | - |
 
 **Recent Trend:**
 
@@ -59,10 +59,6 @@ Progress: [█░░░░░░░░░] 13%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 45min | 3 tasks | 19 files |
-| Phase 06 P01 | 25 min | 3 tasks | 20 files |
-| Phase 06 P02 | 40min | 2 tasks | 3 files |
-| Phase 07 P01 | 5min | 3 tasks | 3 files |
-| Phase 07 P02 | 8min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -75,12 +71,6 @@ Recent decisions affecting current work:
 - [Roadmap]: REQUIREMENTS.md's stated "25 total" v1 count was stale against its own 29 listed REQ-IDs; roadmap mapping and traceability use the actual 29 REQ-IDs present in the document.
 - [Roadmap]: ORC-01 (Supervisor orchestrating all three specialists) mapped to Phase 6, since it cannot be true until the third specialist exists; ORC-02 (typed-JSON, no re-authoring) mapped to Phase 3, where the pattern is first established and provable on one specialist.
 - [Phase 1]: Installed pinned strands-agents==1.54.0/pydantic/boto3/pytest via pip3 install --user (system pip blocked by Debian-managed PyJWT conflict) so the plan's literal 'python -m pytest' verify command resolves them
-- [Phase 6 P01]: check_invoice_status requires an explicit, non-defaulted reference_date (never date.today() inside the tool) and fixtures use absolute ISO due dates, so SC2/SC3 stay deterministic indefinitely without a frozen-clock dependency.
-- [Phase 6 P01]: The fixture query param on /advance is typed Literal["creep","clean"] (structural 422 on any other value) rather than validated by a runtime check, closing the path-traversal vector the same way engagement_id:UUID already does.
-- [Phase 6]: extract_ops_result is a new function on a new shared _find_tool_result_json two-pass helper; extract_triage_result/extract_proposal_result left untouched (D-01 safest reading).
-- [Phase 6]: build_full_supervisor() is purely additive alongside build_supervisor/build_proposal_supervisor -- proven by a prohibition test asserting neither stage-scoped supervisor mutated.
-- [Phase 6]: Demo determinism proof uses curated decision-field dict, excluding engagement_id and invoice_flags[].days_overdue, to avoid day-boundary flakiness — Full model_dump() equality would flake across a day boundary since days_overdue is wall-clock derived
-- [Phase 7]: README section order + Mermaid diagram reuse + LICENSE copyright holder are locked per CONTEXT.md D-03/D-04/D-05; docs cite only RESEARCH-verified commands
 
 ### Pending Todos
 
@@ -88,6 +78,17 @@ None yet.
 
 ### Blockers/Concerns
 
+- [Phase 3 → BLOCKING]: Phase 3 was skipped. `/capture` does not exist, so Phase 4's extension talks to
+  `extension/dev/stub_capture_server.py`. Phase 4's cold-start criterion is verified structurally but never
+  observed in real Chrome against a real endpoint. Build Phase 3, then re-run Phase 4 test 2 for real and
+  delete the stub. Contract the extension already expects is in 04-SUMMARY.md "Handoff to Phase 3".
+- [Phase 2 → demo]: `llm_scorecard` has never run against live Bedrock — this machine has no usable AWS
+  credentials. All deterministic behaviour around it is tested; the live round trip (model id resolving in
+  the configured region, Claude filling `ScorecardJudgment` cleanly) is not. Run
+  `cd backend && python -m scripts.run_triage strong_fixed_apply` with real credentials before recording.
+- [Repo]: `origin/main` does NOT contain Phase 1's implementation. PR #1's merge commit captured the
+  phase-01 branch at its planning commit, so all 7 implementation commits stayed on
+  `gsd/phase-01-foundations-...`. Phase 2 is branched off that branch, not off main. Both need merging.
 - [Phase 1]: Strands multi-agent API surface (`.as_tool()` signature, delegation constraints) must be re-verified against the exact pinned SDK version before building real specialists — do not build from training-data assumptions (research Pitfall 1).
 - [Phase 1]: Exact Bedrock model id/inference-profile string and region must be confirmed against the team's AWS account's "Model access" console page at build time, not hardcoded from research.
 - [Phase 5]: Structured-output schema for the Proposal-Contract Agent must treat `needs_human_input`/`question` as first-class optional fields from the start, or an ambiguous-scope fixture will crash the agent instead of escalating (research Pitfall 3).
@@ -103,6 +104,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-09T21:42:44.663Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-09-01T11:42:06.839Z
+Stopped at: Completed 01-01-PLAN.md
 Resume file: None

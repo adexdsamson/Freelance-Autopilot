@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Freelance Autopilot</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">Freelance Autopilot</h1>
+      <p class="header__subtitle">Paste a job posting to triage it.</p>
+    </header>
+
+    <!-- MV3's CSP forbids inline script and inline handlers, so every
+         listener is attached in popup.js. -->
+    <form id="capture-form" class="form">
+      <label class="label" for="job-text">Job posting</label>
+      <textarea
+        id="job-text"
+        class="textarea"
+        rows="10"
+        placeholder="Paste the full posting here — title, description, budget, and the client-history block."
+        required
+      ></textarea>
+
+      <label class="label" for="source-url">
+        Job URL <span class="label__hint">optional — saved for reference, never fetched</span>
+      </label>
+      <input
+        id="source-url"
+        class="input"
+        type="url"
+        placeholder="https://www.upwork.com/jobs/~0123456789"
+      />
+
+      <button id="submit-button" class="button" type="submit">Run triage</button>
+    </form>
+
+    <section id="pending" class="panel panel--pending" hidden>
+      <span class="spinner" aria-hidden="true"></span>
+      <div>
+        <p class="panel__title">Triaging…</p>
+        <p class="panel__body">Extracting fields, running the kill-switch gate, then scoring.</p>
+      </div>
+    </section>
+
+    <section id="error" class="panel panel--error" hidden>
+      <p class="panel__title">Triage failed</p>
+      <p class="panel__body" id="error-message"></p>
+      <p class="panel__detail" id="error-detail" hidden></p>
+      <button id="retry-button" class="button button--secondary" type="button">Back</button>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div class="verdict">
+        <span id="verdict-badge" class="badge">—</span>
+        <span id="score" class="score"></span>
+      </div>
+
+      <h2 class="result__heading">Reasoning</h2>
+      <p id="reasoning" class="reasoning"></p>
+
+      <h2 class="result__heading">Extracted</h2>
+      <dl id="extracted" class="extracted"></dl>
+
+      <button id="new-capture-button" class="button button--secondary" type="button">
+        Capture another
+      </button>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Foundations — Engagement Record & Strands/Bedrock Verification Spike** - Establish the shared Engagement Record schema/store and prove the Strands agents-as-tools mechanism and Bedrock wiring before any specialist agent logic is written.
 - [x] **Phase 2: Gig Triage Agent (standalone)** - Build and validate the fully autonomous Stage 1 specialist (deterministic gate + LLM scorecard) against fixture jobs, with no Supervisor or API yet.
 - [ ] **Phase 3: Supervisor Wiring + `/capture` Endpoint** - Wire the Supervisor to the Gig Triage Agent via agents-as-tools and expose `/capture` + `GET /engagements/{id}`, proving Stage 1 end-to-end.
-- [ ] **Phase 4: Chrome Extension Capture UI** - Ship the Manifest V3 paste-based capture popup that posts to `/capture` and renders the triage verdict inline.
+- [x] **Phase 4: Chrome Extension Capture UI** - Ship the Manifest V3 paste-based capture popup that posts to `/capture` and renders the triage verdict inline.
 - [x] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity. (completed 2026-09-05)
 - [ ] **Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring** - Build the Stage 3 specialist (scope creep, invoice, status update), wire it as the Supervisor's third tool, and author the deterministic Stage 2-3 fixture set.
 - [ ] **Phase 7: Full Demo Verification & Submission Docs** - Verify the end-to-end pipeline runs deterministically within the 5-minute demo window and complete the submission checklist (README, license, diagram, demo script).
@@ -96,7 +96,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The `background.js` service worker POSTs the payload to `/capture` and completes the round trip after a cold start (DevTools closed, idle more than 30 seconds).
   3. The popup shows an explicit pending state while waiting, then renders the returned verdict, score, and reasoning inline once the agent responds.
 
-**Plans**: TBD
+**Plans**: 3 (04-01 manifest+worker, 04-02 popup, 04-03 harness+tests)
 **UI hint**: yes
 
 ### Phase 5: Proposal-Contract Agent + `/advance` (stage="proposal")
@@ -178,8 +178,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/1 | Planned    |  |
 | 2. Gig Triage Agent (standalone) | 3/3 | Complete | 2026-09-02 |
 | 3. Supervisor Wiring + `/capture` Endpoint | 1/1 | Complete | 2026-09-02 |
-| 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
-| 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete    | 2026-09-05 |
-| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 2/2 | In Progress|  |
-| 7. Full Demo Verification & Submission Docs | 2/2 | In Progress|  |
+| 4. Chrome Extension Capture UI | 3/3 | Complete | 2026-09-09 |
+| 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete | 2026-09-05 |
+| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 2/2 | Complete | 2026-09-08 |
+| 7. Full Demo Verification & Submission Docs | 2/2 | Complete | 2026-09-09 |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |
