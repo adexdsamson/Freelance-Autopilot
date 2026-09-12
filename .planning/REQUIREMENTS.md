@@ -55,10 +55,10 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 ### Fixtures, Demo & Submission
 
 - [x] **DEMO-01**: Fixtures seed Stages 2–3 deterministically: sample jobs (mixed fit), a client thread containing a deliberate scope-creep message, and a payment schedule with one overdue milestone.
-- [ ] **DEMO-02**: The end-to-end run (extension capture → triage → proposal/contract → ops flags) completes with no manual glue steps and repeats deterministically.
-- [ ] **DEMO-03**: README documents setup and run instructions.
-- [ ] **DEMO-04**: An OSI license (MIT or Apache-2.0) is present at the repo root.
-- [ ] **DEMO-05**: An architecture diagram and a demo script (docs/demo-script.md) are included.
+- [x] **DEMO-02**: The end-to-end run (extension capture → triage → proposal/contract → ops flags) completes with no manual glue steps and repeats deterministically.
+- [x] **DEMO-03**: README documents setup and run instructions.
+- [x] **DEMO-04**: An OSI license (MIT or Apache-2.0) is present at the repo root.
+- [x] **DEMO-05**: An architecture diagram and a demo script (docs/demo-script.md) are included.
 
 ## v2 Requirements
 
@@ -112,10 +112,10 @@ Populated during roadmap creation.
 | OPS-03 | Phase 6 | Complete |
 | OPS-04 | Phase 6 | Complete |
 | DEMO-01 | Phase 6 | Complete |
-| DEMO-02 | Phase 7 | Pending |
-| DEMO-03 | Phase 7 | Pending |
-| DEMO-04 | Phase 7 | Pending |
-| DEMO-05 | Phase 7 | Pending |
+| DEMO-02 | Phase 7 | Complete |
+| DEMO-03 | Phase 7 | Complete |
+| DEMO-04 | Phase 7 | Complete |
+| DEMO-05 | Phase 7 | Complete |
 | DEPLOY-01 (v2) | Phase 8 (optional) | Deferred |
 | DEPLOY-02 (v2) | Phase 8 (optional) | Deferred |
 
