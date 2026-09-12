@@ -5,3 +5,10 @@ fastapi>=0.141,<0.142
 uvicorn[standard]>=0.52,<0.53
 httpx
 pytest
+
+# --- Optional: Phase 8 AgentCore deployment (cut-first stretch) -------------
+# Deliberately NOT a hard dependency. The local file-store path must keep
+# working with this uninstalled (Phase 8 SC3), which is enforced by
+# tests/test_store_factory.py's import-blocked subprocess test. Install with:
+#     pip install 'bedrock-agentcore[strands-agents]'
+# bedrock-agentcore[strands-agents]>=1.23,<2

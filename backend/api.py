@@ -56,7 +56,7 @@ from models.engagement_record import (
     ProposalSlice,
 )
 from store.engagement_store import EngagementStore
-from store.file_engagement_store import FileEngagementStore
+from store.factory import build_engagement_store
 
 app = FastAPI()
 _store: EngagementStore | None = None
@@ -66,9 +66,14 @@ def get_store() -> EngagementStore:
     # Lazy single construction point (Phase 1's swap seam). Constructing at
     # first-use rather than import time avoids a cwd-relative mkdir side effect
     # when the module is merely imported (e.g. by tests or tooling).
+    #
+    # Phase 8 (SC1): the concrete class is now chosen by store.factory from
+    # ENGAGEMENT_STORE, so swapping to AgentCore Memory is configuration, not
+    # a code change. This function is the ONLY line that had to move for that,
+    # which is what Phase 1's D-02 seam was promising. Default stays "file".
     global _store
     if _store is None:
-        _store = FileEngagementStore()
+        _store = build_engagement_store()
     return _store
 
 

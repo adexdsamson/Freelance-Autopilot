@@ -16,6 +16,12 @@ dev = [
     "pytest",
     "httpx",
 ]
+# Phase 8's cut-first stretch. An extra, never a dependency: the local path is
+# required to keep working with this uninstalled (SC3), which
+# tests/test_store_factory.py enforces in an import-blocked subprocess.
+agentcore = [
+    "bedrock-agentcore[strands-agents]>=1.23,<2",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
