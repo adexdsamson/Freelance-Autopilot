@@ -1,0 +1,15 @@
+Full-Stack Developer for Long-Term Product Work
+
+Fixed-price - Expert - Est. Budget: $6,000
+
+We are building out a marketplace product and want a full-stack developer to
+join for an extended engagement. Strong React and Node skills required.
+
+To shortlist candidates we ask every applicant to complete an unpaid test
+task first: build a working checkout flow against our sandbox API. It should
+take a competent developer about two days.
+
+About the client
+Payment method verified
+$31K total spent
+18 hires, 66% hire rate
