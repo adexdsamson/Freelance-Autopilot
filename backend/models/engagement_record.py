@@ -103,10 +103,36 @@ class ProposalContractResult(BaseModel):
         return self
 
 
+class ScopeCreepFlag(BaseModel):
+    message: str
+    reason: str
+
+
+class InvoiceFlag(BaseModel):
+    milestone_label: str
+    due_date: str
+    days_overdue: int
+
+
+class StatusUpdate(BaseModel):
+    text: str
+
+
+class OpsResult(BaseModel):
+    """D-06/D-07: the Ops specialist's ONE strict typed result — a status
+    update plus escalation cards (scope-creep + invoice flags). Constructed
+    on both the deterministic and live paths (never a bare dict), mirroring
+    ProposalContractResult's role as the shared runner/API contract."""
+
+    status_update: StatusUpdate
+    scope_creep_flags: list[ScopeCreepFlag] = Field(default_factory=list)
+    invoice_flags: list[InvoiceFlag] = Field(default_factory=list)
+
+
 class OpsSlice(BaseModel):
-    status_updates: list[dict] = Field(default_factory=list)
-    scope_creep_flags: list[dict] = Field(default_factory=list)
-    invoice_flags: list[dict] = Field(default_factory=list)
+    status_updates: list[StatusUpdate] = Field(default_factory=list)
+    scope_creep_flags: list[ScopeCreepFlag] = Field(default_factory=list)
+    invoice_flags: list[InvoiceFlag] = Field(default_factory=list)
 
 
 class EngagementRecord(BaseModel):

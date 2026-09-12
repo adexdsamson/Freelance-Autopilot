@@ -15,7 +15,7 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Orchestration (Strands Supervisor)
 
-- [ ] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
+- [x] **ORC-01**: A Strands Supervisor agent orchestrates three distinct specialist Agent instances via the agents-as-tools pattern (four separately traceable agents, not one wrapped LLM call).
 - [x] **ORC-02**: Each specialist returns strict typed JSON that FastAPI merges into the Engagement Record without the Supervisor re-authoring it.
 - [x] **ORC-03**: Claude on Amazon Bedrock is wired as the Strands model provider with an explicit model id and region.
 
@@ -30,7 +30,7 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 - [x] **API-01**: `POST /capture` accepts a structured job payload, runs triage via the Supervisor, writes the result to a new Engagement Record, and returns the verdict.
 - [x] **API-02**: `GET /engagements/{id}` returns the current Engagement Record.
-- [ ] **API-03**: `POST /engagements/{id}/advance` advances the engagement to the next stage (proposal/contract, then ops) and returns the updated record.
+- [x] **API-03**: `POST /engagements/{id}/advance` advances the engagement to the next stage (proposal/contract, then ops) and returns the updated record.
 
 ### Chrome Extension (capture client)
 
@@ -47,14 +47,14 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 
 ### Ops (Stage 3 — escalates on creep / overdue)
 
-- [ ] **OPS-01**: `check_scope_creep` compares incoming (fixture) client messages against the signed SOW's deliverables and flags creep.
-- [ ] **OPS-02**: `check_invoice_status` flags milestones overdue against the payment schedule.
-- [ ] **OPS-03**: `draft_status_update` generates a client-ready status summary.
-- [ ] **OPS-04**: Each scope-creep flag, invoice flag, and judgment-needed status is surfaced as a distinct escalation card in the Ops output.
+- [x] **OPS-01**: `check_scope_creep` compares incoming (fixture) client messages against the signed SOW's deliverables and flags creep.
+- [x] **OPS-02**: `check_invoice_status` flags milestones overdue against the payment schedule.
+- [x] **OPS-03**: `draft_status_update` generates a client-ready status summary.
+- [x] **OPS-04**: Each scope-creep flag, invoice flag, and judgment-needed status is surfaced as a distinct escalation card in the Ops output.
 
 ### Fixtures, Demo & Submission
 
-- [ ] **DEMO-01**: Fixtures seed Stages 2–3 deterministically: sample jobs (mixed fit), a client thread containing a deliberate scope-creep message, and a payment schedule with one overdue milestone.
+- [x] **DEMO-01**: Fixtures seed Stages 2–3 deterministically: sample jobs (mixed fit), a client thread containing a deliberate scope-creep message, and a payment schedule with one overdue milestone.
 - [ ] **DEMO-02**: The end-to-end run (extension capture → triage → proposal/contract → ops flags) completes with no manual glue steps and repeats deterministically.
 - [ ] **DEMO-03**: README documents setup and run instructions.
 - [ ] **DEMO-04**: An OSI license (MIT or Apache-2.0) is present at the repo root.
@@ -105,13 +105,13 @@ Populated during roadmap creation.
 | PROP-02 | Phase 5 | Complete |
 | PROP-03 | Phase 5 | Complete |
 | PROP-04 | Phase 5 | Complete |
-| ORC-01 | Phase 6 | Pending |
-| API-03 | Phase 6 | Pending |
-| OPS-01 | Phase 6 | Pending |
-| OPS-02 | Phase 6 | Pending |
-| OPS-03 | Phase 6 | Pending |
-| OPS-04 | Phase 6 | Pending |
-| DEMO-01 | Phase 6 | Pending |
+| ORC-01 | Phase 6 | Complete |
+| API-03 | Phase 6 | Complete |
+| OPS-01 | Phase 6 | Complete |
+| OPS-02 | Phase 6 | Complete |
+| OPS-03 | Phase 6 | Complete |
+| OPS-04 | Phase 6 | Complete |
+| DEMO-01 | Phase 6 | Complete |
 | DEMO-02 | Phase 7 | Pending |
 | DEMO-03 | Phase 7 | Pending |
 | DEMO-04 | Phase 7 | Pending |

@@ -10,7 +10,7 @@ import ast
 from pathlib import Path
 
 FORBIDDEN_MODULE_PREFIXES = ("store", "backend.store")
-SCAN_DIRS = ["agents", "tools"]
+SCAN_DIRS = ["agents", "tools", "fixtures"]
 
 
 def _imported_module_names(py_file: Path) -> set[str]:
