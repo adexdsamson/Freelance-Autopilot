@@ -1,0 +1,12 @@
+WordPress to Next.js Migration
+
+Fixed-price - Intermediate - Est. Budget: $4,200
+
+We want to migrate our marketing site off WordPress onto Next.js with a
+headless CMS. Roughly 40 pages plus a blog archive.
+
+About the client
+Payment method not verified
+$180 total spent
+1 hire, 11% hire rate
+9 jobs posted
