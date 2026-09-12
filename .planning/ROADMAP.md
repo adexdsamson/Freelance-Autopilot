@@ -24,7 +24,7 @@ deployment stretch, sequenced last and structured to cost nothing already built 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundations — Engagement Record & Strands/Bedrock Verification Spike** - Establish the shared Engagement Record schema/store and prove the Strands agents-as-tools mechanism and Bedrock wiring before any specialist agent logic is written.
-- [ ] **Phase 2: Gig Triage Agent (standalone)** - Build and validate the fully autonomous Stage 1 specialist (deterministic gate + LLM scorecard) against fixture jobs, with no Supervisor or API yet.
+- [x] **Phase 2: Gig Triage Agent (standalone)** - Build and validate the fully autonomous Stage 1 specialist (deterministic gate + LLM scorecard) against fixture jobs, with no Supervisor or API yet.
 - [ ] **Phase 3: Supervisor Wiring + `/capture` Endpoint** - Wire the Supervisor to the Gig Triage Agent via agents-as-tools and expose `/capture` + `GET /engagements/{id}`, proving Stage 1 end-to-end.
 - [ ] **Phase 4: Chrome Extension Capture UI** - Ship the Manifest V3 paste-based capture popup that posts to `/capture` and renders the triage verdict inline.
 - [ ] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity.
@@ -65,7 +65,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `llm_scorecard` produces a score and reasoning for a fixture job's fit, competition, and rate reasonableness.
   4. Running the Gig Triage Agent standalone against a fixture job returns `{ verdict, score, reasoning, extracted_fields }` with no escalation fields present anywhere in the output.
 
-**Plans**: TBD
+**Plans**: 3 (02-01 schemas/policy, 02-02 tools, 02-03 specialist+runner)
 
 ### Phase 3: Supervisor Wiring + `/capture` Endpoint
 
@@ -167,8 +167,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/1 | Planned    |  |
-| 2. Gig Triage Agent (standalone) | 0/TBD | Not started | - |
-| 3. Supervisor Wiring + `/capture` Endpoint | 0/1 | Planned | - |
+| 2. Gig Triage Agent (standalone) | 3/3 | Complete | 2026-09-02 |
+| 3. Supervisor Wiring + `/capture` Endpoint | 1/1 | Complete | 2026-09-02 |
 | 4. Chrome Extension Capture UI | 0/TBD | Not started | - |
 | 5. Proposal-Contract Agent + `/advance` (proposal) | 0/TBD | Not started | - |
 | 6. Ops Agent, Fixtures & Full Supervisor Wiring | 0/TBD | Not started | - |

@@ -1,0 +1,11 @@
+Django API for Appointment Booking
+
+Fixed-price - Intermediate - Est. Budget: $3,000
+
+Build a Django REST API for an appointment booking product. Endpoints for
+availability, booking, cancellation and reminders. Postgres backend.
+
+About the client
+Payment method verified
+$2,400 total spent
+3 hires, 40% hire rate

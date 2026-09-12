@@ -1,0 +1,16 @@
+Backend Engineer for Payments Reconciliation Service
+
+Hourly - Expert - $95/hr
+
+Our payments reconciliation runs as a nightly batch and is now taking eleven
+hours to complete. We need a senior backend engineer to profile it, redesign
+the aggregation strategy, and bring the run time under one hour.
+
+Stack is Python 3.12, Postgres 16 and Celery. You will have full access to a
+production-shaped staging dataset from day one.
+
+About the client
+Payment method verified
+$67K total spent
+23 hires, 74% hire rate
+41 jobs posted
