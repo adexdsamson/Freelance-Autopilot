@@ -1,0 +1,24 @@
+Senior React Developer to Rebuild SaaS Analytics Dashboard
+
+Fixed-price - Expert - Est. Budget: $8,500
+
+We are a Series A logistics company and our internal analytics dashboard has
+outgrown its original implementation. We need an experienced React developer
+to rebuild it against our existing GraphQL API.
+
+Scope:
+- Rebuild 14 existing chart views in React 18 + TypeScript
+- Replace our hand-rolled state layer with TanStack Query
+- Implement CSV/PDF export for every view
+- Reach 80% test coverage on the new components
+
+You will work directly with our two backend engineers. Designs are already
+finalised in Figma. We have a clear six-week timeline and a defined
+acceptance checklist.
+
+About the client
+Payment method verified
+$142K total spent
+45 hires, 89% hire rate
+132 jobs posted
+Member since Jan 2019
