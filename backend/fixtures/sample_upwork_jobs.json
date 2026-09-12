@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Build a marketing site with React",
+    "description": "Standard React build with a clear scope, three deliverable phases, and a deadline in 6 weeks.",
+    "budget": 2500.0,
+    "client_stats": {"total_spent": 15000.0, "hire_rate": 0.8, "reviews": 22}
+  },
+  {
+    "title": "Ongoing design retainer",
+    "description": "Looking for someone to help with ongoing design work, scope to be figured out as we go.",
+    "budget": 500.0,
+    "client_stats": {"total_spent": 300.0, "hire_rate": 0.2, "reviews": 1}
+  },
+  {
+    "title": "API integration for e-commerce checkout",
+    "description": "Integrate Stripe checkout, two deliverable milestones, due within 4 weeks.",
+    "budget": 1800.0,
+    "client_stats": {"total_spent": 42000.0, "hire_rate": 0.9, "reviews": 60}
+  },
+  {
+    "title": "Ghost job posting, no budget listed",
+    "description": "Need a developer for a project. Details to be discussed.",
+    "budget": null,
+    "client_stats": {"total_spent": 0.0, "hire_rate": 0.0, "reviews": 0}
+  },
+  {
+    "title": "Mobile app MVP build",
+    "description": "Build an MVP mobile app with four deliverable milestones and a deadline in 8 weeks.",
+    "budget": 6000.0,
+    "client_stats": {"total_spent": 80000.0, "hire_rate": 0.85, "reviews": 110}
+  },
+  {
+    "title": "Quick logo tweak, unrealistic budget",
+    "description": "Need a full brand redesign asap, budget is very tight.",
+    "budget": 25.0,
+    "client_stats": {"total_spent": 100.0, "hire_rate": 0.1, "reviews": 2}
+  },
+  {
+    "title": "Data pipeline refactor",
+    "description": "Refactor an existing ETL pipeline, clear scope, three phases, due in 5 weeks.",
+    "budget": 3200.0,
+    "client_stats": {"total_spent": 21000.0, "hire_rate": 0.75, "reviews": 34}
+  }
+]

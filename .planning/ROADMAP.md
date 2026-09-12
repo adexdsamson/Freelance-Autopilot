@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Gig Triage Agent (standalone)** - Build and validate the fully autonomous Stage 1 specialist (deterministic gate + LLM scorecard) against fixture jobs, with no Supervisor or API yet.
 - [ ] **Phase 3: Supervisor Wiring + `/capture` Endpoint** - Wire the Supervisor to the Gig Triage Agent via agents-as-tools and expose `/capture` + `GET /engagements/{id}`, proving Stage 1 end-to-end.
 - [x] **Phase 4: Chrome Extension Capture UI** - Ship the Manifest V3 paste-based capture popup that posts to `/capture` and renders the triage verdict inline.
-- [ ] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity.
+- [x] **Phase 5: Proposal-Contract Agent + `/advance` (proposal)** - Build the Stage 2 specialist that drafts proposal/contract/payment schedule and escalates on scope/budget ambiguity. (completed 2026-09-05)
 - [ ] **Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring** - Build the Stage 3 specialist (scope creep, invoice, status update), wire it as the Supervisor's third tool, and author the deterministic Stage 2-3 fixture set.
 - [ ] **Phase 7: Full Demo Verification & Submission Docs** - Verify the end-to-end pipeline runs deterministically within the 5-minute demo window and complete the submission checklist (README, license, diagram, demo script).
 - [ ] **Phase 8: AgentCore Deployment (optional, cut-first)** - Swap the Engagement Record store to AgentCore Memory and deploy the Supervisor/specialists to AgentCore Runtime, only after Phase 7's local demo is fully working, with the local path kept as fallback.
@@ -80,7 +80,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The Gig Triage Agent's typed JSON output reaches the Engagement Record unmodified — the Supervisor's model does not re-author or paraphrase it before FastAPI merges it in.
   4. Trace/log inspection of one `/capture` call shows two distinct Agent invocations (Supervisor and Gig Triage), not one flat call.
 
-**Plans**: TBD
+**Plans:** 1 plan
+
+- [ ] 03-01-PLAN.md — Supervisor+Gig Triage agents-as-tools typed channel (ORC-02) behind a TRIAGE_BACKEND seam, deterministic placeholder triage, `POST /capture` + `GET /engagements/{id}` (API-01/02), FastAPI sole-writer, Bedrock fail-fast 503
 
 ### Phase 4: Chrome Extension Capture UI
 
@@ -110,7 +112,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. No single response contains both a fully populated contract and `needs_human_input=true` — the happy path and the escalation path are mutually exclusive outcomes of the same schema.
   4. The Engagement Record's `proposal` and `contract` slices are populated only via FastAPI's merge of the specialist's typed output, never written by the agent directly.
 
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+
+- [x] 05-01-PLAN.md — Deterministic Proposal-Contract stage end-to-end: enriched Engagement Record (typed payment schedule + mutually-exclusive result model), three PRD §7.2 dual-use tools, `ProposalRunner` seam, `POST /engagements/{id}/advance?stage=proposal` (guards + verbatim merge + 503 fail-fast) — PROP-01..04, SC1-SC4 offline
+- [x] 05-02-PLAN.md — Live two-agent path: distinct Proposal-Contract Agent + stage-scoped `build_proposal_supervisor` + `extract_proposal_result` (agents-as-tools, D-04); offline wiring proof + manual live Bedrock trace
 
 ### Phase 6: Ops Agent, Fixtures & Full Supervisor Wiring
 
@@ -126,7 +131,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `draft_status_update` produces a client-ready status summary that reflects whatever flags are currently active.
   5. `POST /engagements/{id}/advance` correctly routes to and completes both the `proposal` and `ops` stages, returning the updated record each time.
 
-**Plans**: TBD
+**Plans:** 2/2 plans executed
+
+- [x] 06-01-PLAN.md — Deterministic ops stage end-to-end: three ops tools + Stage 2–3 fixtures (creep/clean variants) + `OpsRunner` seam + typed `OpsResult`/`OpsSlice` cards + `POST /advance?stage=ops` (409 guard, `fixture` Literal, 503 fail-fast) — API-03, OPS-01..04, DEMO-01, SC2–SC5 offline
+- [x] 06-02-PLAN.md — Unified three-specialist Supervisor: `build_ops_agent` + `build_full_supervisor` (all three specialists as agents-as-tools) + name-disambiguated `extract_ops_result` (ORC-01/SC1); offline construction + extraction proof, live four-agent trace manual
 
 ### Phase 7: Full Demo Verification & Submission Docs
 
@@ -141,7 +149,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The repo root has a visible OSI license (MIT or Apache-2.0) and a README with clear setup and run instructions.
   4. An architecture diagram matching the actual object graph and a `docs/demo-script.md` are both present in the repository.
 
-**Plans**: TBD
+**Plans:** 2/2 plans executed
+
+- [x] 07-01-PLAN.md — TRACER: deterministic end-to-end demo entrypoint (`backend/scripts/run_demo.py`) + 3x determinism proof + REC-03 guard hardened to cover `backend/scripts/` (DEMO-02)
+- [x] 07-02-PLAN.md — Submission docs: repo-root README + MIT LICENSE, `docs/architecture.md` (Mermaid, real object graph) + `docs/demo-script.md`, and a presence test (DEMO-03/04/05)
 
 ### Phase 8: AgentCore Deployment (optional, cut-first)
 
@@ -166,9 +177,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 (Ph
 |-------|----------------|--------|-----------|
 | 1. Foundations — Engagement Record & Strands/Bedrock Verification Spike | 0/1 | Planned    |  |
 | 2. Gig Triage Agent (standalone) | 3/3 | Complete | 2026-09-02 |
-| 3. Supervisor Wiring + `/capture` Endpoint | 0/TBD | Not started | - |
-| 4. Chrome Extension Capture UI | 3/3 | Complete (vs. stubbed /capture) | 2026-09-09 |
-| 5. Proposal-Contract Agent + `/advance` (proposal) | 0/TBD | Not started | - |
-| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 0/TBD | Not started | - |
-| 7. Full Demo Verification & Submission Docs | 0/TBD | Not started | - |
+| 3. Supervisor Wiring + `/capture` Endpoint | 1/1 | Complete | 2026-09-02 |
+| 4. Chrome Extension Capture UI | 3/3 | Complete | 2026-09-09 |
+| 5. Proposal-Contract Agent + `/advance` (proposal) | 2/2 | Complete | 2026-09-05 |
+| 6. Ops Agent, Fixtures & Full Supervisor Wiring | 2/2 | Complete | 2026-09-08 |
+| 7. Full Demo Verification & Submission Docs | 2/2 | Complete | 2026-09-09 |
 | 8. AgentCore Deployment (optional, cut-first) | 0/TBD | Not started | - |
