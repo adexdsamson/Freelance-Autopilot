@@ -9,6 +9,14 @@ explicitly NOT proven; see the module docstring on
 """
 import pytest
 
+# The AgentCore adapter is the cut-first Phase 8 stretch: the `bedrock-agentcore`
+# package is an optional extra (see pyproject `[project.optional-dependencies]
+# agentcore`), so the default offline suite runs without it installed. Skip this
+# module's adapter tests when the package is absent rather than breaking
+# collection of the whole suite — matching how the store module itself lazily
+# imports the dependency so the file-store path never requires it.
+pytest.importorskip("bedrock_agentcore")
+
 from bedrock_agentcore.memory.constants import BlobMessage
 from models.engagement_record import EngagementRecord, JobSlice, TriageSlice
 from store.agentcore_memory_store import (
