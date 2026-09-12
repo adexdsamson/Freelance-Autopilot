@@ -13,8 +13,20 @@ A FastAPI backend is the sole writer of the Engagement Record; it exposes `/capt
 Supervisor (`build_full_supervisor`) that orchestrates the Gig Triage, Proposal-Contract,
 and Ops specialist agents via the agents-as-tools pattern. Each stage has a deterministic
 default backend for the demo and a live Bedrock path behind a `*_BACKEND=supervisor`
-env-var switch. See [`docs/architecture.md`](docs/architecture.md) for the full Mermaid
-diagram and component table.
+env-var switch. A Manifest V3 Chrome extension ([`extension/`](extension/)) is the
+paste-based capture front that POSTs a job posting to `/capture`. Persistence sits behind a
+swappable `EngagementStore` interface: a file-based store by default, with an optional
+Amazon Bedrock AgentCore Memory store and Runtime entrypoint selectable by config. See
+[`docs/architecture.md`](docs/architecture.md) for the full Mermaid diagram and component
+table.
+
+### Layout
+
+- `backend/` — FastAPI app, the Strands Supervisor + three specialist agents, tools,
+  fixtures, the Engagement Record store, and the test suite.
+- `extension/` — the Manifest V3 capture extension (popup + background service worker) and
+  a local stub `/capture` server for development.
+- `docs/` — architecture diagram and the demo-walkthrough script.
 
 ## Setup
 
@@ -60,6 +72,37 @@ cd backend && uvicorn api:app --reload
 > resolve when `backend/` itself is on `sys.path`. The forms `python3
 > backend/scripts/run_demo.py` and `uvicorn backend/api.py:app` do **not** work.
 
+### Chrome extension (capture front)
+
+The extension is loaded unpacked in Chrome:
+
+1. Start the backend (`cd backend && uvicorn api:app --reload`), or the lightweight stub
+   (`python3 extension/dev/stub_capture_server.py`) for UI-only work.
+2. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and
+   select the [`extension/`](extension/) directory.
+3. Open the popup, paste a job posting, and submit; the triage verdict, score, and
+   reasoning render inline once `/capture` responds.
+
+`host_permissions` is scoped to the local backend origin only (no `<all_urls>`). See
+[`extension/README.md`](extension/README.md) for details.
+
+## Optional: AgentCore deployment
+
+The Engagement Record store is swappable behind the `EngagementStore` interface. An
+optional Amazon Bedrock AgentCore Memory store (`backend/store/agentcore_memory_store.py`,
+selected via `backend/store/factory.py`) and a Runtime entrypoint
+(`backend/agentcore_runtime.py`) let the Supervisor and specialists run on AgentCore
+without changing agent or API code. This path is off by default; the file-based store is the
+supported default and the offline demo never requires it. Install the optional dependency
+with:
+
+```bash
+pip install './backend[agentcore]'   # or: pip install 'bedrock-agentcore[strands-agents]'
+```
+
+The live AgentCore Memory round trip and Runtime deployment need real AWS credentials and a
+provisioned AgentCore Memory resource; they are manual-verification-only (see below).
+
 ## Test
 
 Run the full offline test suite (no AWS credentials required):
@@ -80,17 +123,22 @@ cd backend && python3 -m pytest
 | ORC-02 | Each specialist returns strict typed JSON merged verbatim, never re-authored | Complete (Phase 3) |
 | REC-03 | FastAPI is the sole writer that merges specialist output into the Engagement Record | Complete (Phase 1) |
 | API-03 | `POST /engagements/{id}/advance` advances the engagement to the next stage | Complete (Phase 6) |
+| CAP-01..03 | Manifest V3 paste-based capture extension posts to `/capture` and renders the verdict inline | Complete (Phase 4, [`extension/`](extension/)) |
+| DEPLOY-01/02 (v2) | Optional AgentCore Memory store + Runtime behind the store interface | Present, off by default (Phase 8) |
 
-See [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) for the full requirements list.
+All v1 requirements (Phases 1–7) are complete and merged. See
+[`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) for the full requirements list.
 
 ## Manual-only boundaries
 
-Three things are intentionally out of scope for automation in this repository:
+These things are intentionally out of scope for automation in this repository:
 
-1. **Chrome MV3 extension capture front.** The extension that would paste a job posting
-   and POST it to `/capture` is a Phase 4 dependency and is not built on this branch. The
-   "capture" step in the demo is the same `POST /capture` call the extension would itself
-   make; nothing here is faked, it's simply not yet wired to a browser UI.
+1. **The live extension round trip in a browser.** The Manifest V3 extension is built
+   ([`extension/`](extension/)) and its structure is covered by tests, but exercising the
+   real popup -> service-worker -> `/capture` round trip requires loading it unpacked in
+   Chrome against a running backend — a manual step. The one-command demo drives the same
+   `POST /capture` call the extension makes, so the pipeline is exercised end to end without
+   a browser.
 2. **The recorded demo video.** This repository ships the walkthrough script
    ([`docs/demo-script.md`](docs/demo-script.md)) the video follows; recording the video
    itself is a human action.
@@ -100,3 +148,7 @@ Three things are intentionally out of scope for automation in this repository:
    `TRIAGE_BACKEND=supervisor`, `PROPOSAL_BACKEND=supervisor`, and `OPS_BACKEND=supervisor`
    before running the demo or server commands above. This path is manual-verification-only
    and is never exercised by the automated test suite.
+4. **The live AgentCore Memory / Runtime path.** The optional store and Runtime entrypoint
+   are present (see "Optional: AgentCore deployment") but the live round trip and deployment
+   need real AWS credentials and a provisioned AgentCore Memory resource; they are
+   manual-verification-only and never exercised by the automated test suite.
