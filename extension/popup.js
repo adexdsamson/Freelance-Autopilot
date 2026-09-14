@@ -34,6 +34,54 @@ const reasoningEl = document.getElementById("reasoning");
 const extractedEl = document.getElementById("extracted");
 const newCaptureButton = document.getElementById("new-capture-button");
 
+/**
+ * Draft persistence (CAP-03 usability).
+ *
+ * An MV3 popup's document is torn down the instant the popup loses focus --
+ * switching to another window to copy the posting's URL is enough to wipe a
+ * half-pasted job. localStorage on the extension origin survives that teardown
+ * and, unlike chrome.storage, needs NO manifest permission -- which matters
+ * here because the extension deliberately declares an empty `permissions` list
+ * (the no-scraping ToS posture; see test_extension_manifest.py). So the paste
+ * draft is mirrored to localStorage on every keystroke and restored when the
+ * popup reopens; it is cleared only once a capture succeeds or the user starts
+ * a fresh one, so an error still leaves the text in place to retry.
+ */
+const DRAFT_TEXT_KEY = "fa.draft.jobText";
+const DRAFT_URL_KEY = "fa.draft.sourceUrl";
+
+function saveDraft() {
+  try {
+    localStorage.setItem(DRAFT_TEXT_KEY, jobTextInput.value);
+    localStorage.setItem(DRAFT_URL_KEY, sourceUrlInput.value);
+  } catch {
+    /* private mode / storage disabled: persistence is best-effort. */
+  }
+}
+
+function restoreDraft() {
+  try {
+    const text = localStorage.getItem(DRAFT_TEXT_KEY);
+    const url = localStorage.getItem(DRAFT_URL_KEY);
+    if (text) jobTextInput.value = text;
+    if (url) sourceUrlInput.value = url;
+  } catch {
+    /* best-effort: an empty form is a fine fallback. */
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_TEXT_KEY);
+    localStorage.removeItem(DRAFT_URL_KEY);
+  } catch {
+    /* nothing reachable to clean up. */
+  }
+}
+
+jobTextInput.addEventListener("input", saveDraft);
+sourceUrlInput.addEventListener("input", saveDraft);
+
 /** The popup is only ever in exactly one of these. */
 function showState(state) {
   form.hidden = state !== "form";
@@ -99,9 +147,14 @@ form.addEventListener("submit", (event) => {
       return;
     }
     if (!response.ok) {
+      // Keep the draft on error so the user can fix and retry without
+      // re-pasting.
       showError(response.error, response.detail);
       return;
     }
+    // The posting was captured successfully -- the draft has served its
+    // purpose and would only reappear stale on the next open.
+    clearDraft();
     renderResult(response.data);
   });
 });
@@ -125,8 +178,10 @@ retryButton.addEventListener("click", () => showState("form"));
 newCaptureButton.addEventListener("click", () => {
   jobTextInput.value = "";
   sourceUrlInput.value = "";
+  clearDraft();
   showState("form");
   jobTextInput.focus();
 });
 
+restoreDraft();
 showState("form");
