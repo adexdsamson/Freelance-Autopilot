@@ -49,6 +49,17 @@ notes: |
     this account. Fill out the Anthropic use case details form before using the
     model." The app mapped it to a clean 503 with no credential leak. Complete the
     Anthropic use-case form in Bedrock Model access (us-east-1), wait ~15 min, retry.
+  - Region/model resolved (2026-09-14): with AWS_REGION=ca-central-1 and a
+    `global.anthropic.claude-sonnet-4-5-...` inference profile, Bedrock accepted the
+    model and streamed a real Claude completion ("I'll analyze this job posting to
+    determine whether you should apply or skip it."). The live trace showed the
+    nested orchestration: Supervisor -> gig_triage_agent (tool) -> its own
+    placeholder_kill_switch_check tool — agents-as-tools executing against real
+    Bedrock (ORC-01/ORC-02 demonstrated live).
+  - SOLE remaining gate is an AWS ACCOUNT onboarding step: "Model use case details
+    have not been submitted for this account. Fill out the Anthropic use case
+    details form ... try again in 15 minutes." Submit the Anthropic use-case form in
+    Bedrock Model access, wait ~15 min, retry the same command for the full green run.
   - SECURITY: the AWS key used was exposed in a screenshot during testing and must
     be rotated/deleted.
 
