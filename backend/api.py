@@ -32,12 +32,12 @@ api.py is the ONLY module in this codebase that imports the store.
 """
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 from uuid import UUID
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from strands.types.exceptions import (
     ContextWindowOverflowException,
     ModelThrottledException,
@@ -57,6 +57,7 @@ from models.engagement_record import (
 )
 from store.engagement_store import EngagementStore
 from store.factory import build_engagement_store
+from tools.triage_tools import extract_job_fields
 
 app = FastAPI()
 _store: EngagementStore | None = None
@@ -128,12 +129,61 @@ def map_bedrock_error(exc: Exception) -> BedrockUnavailableError:
     )
 
 
+class CaptureRequest(BaseModel):
+    """Request body for POST /capture.
+
+    Accepts EITHER a structured job payload (`title` + `description`, the Phase 3
+    contract) OR the raw pasted text the Chrome MV3 extension posts
+    (`{"raw_text": "..."}`, Phase 4). When only `raw_text` is supplied, the
+    structured `JobSlice` fields are recovered with `extract_job_fields` (TRI-01)
+    — deterministic and offline, no Bedrock — so the extension's paste-based
+    capture completes the same path a structured payload does.
+
+    Keeping both shapes valid preserves backward compatibility: the existing
+    `/capture` tests and `run_demo` post a structured job and are unaffected.
+    """
+
+    raw_text: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    budget: Optional[float] = None
+    client_stats: Optional[dict] = None
+
+    @model_validator(mode="after")
+    def _resolve_job_fields(self) -> "CaptureRequest":
+        # Structured path (Phase 3): title + description already present.
+        if self.title and self.description:
+            return self
+        # Raw-text path (Phase 4 extension): recover fields deterministically.
+        if self.raw_text and self.raw_text.strip():
+            fields = extract_job_fields(self.raw_text)
+            self.title = self.title or fields.get("title")
+            self.description = self.description or fields.get("description")
+            if self.budget is None:
+                self.budget = fields.get("budget")
+            if self.client_stats is None:
+                self.client_stats = fields.get("client_stats")
+            return self
+        raise ValueError(
+            "provide a structured job (title and description) or raw_text to extract from"
+        )
+
+    def to_job_slice(self) -> JobSlice:
+        return JobSlice(
+            title=self.title,
+            description=self.description,
+            budget=self.budget,
+            client_stats=self.client_stats,
+        )
+
+
 @app.post("/capture", response_model=CaptureResponse)
 def capture(
-    job: JobSlice,
+    payload: CaptureRequest,
     store: Annotated[EngagementStore, Depends(get_store)],
     triage_runner: Annotated[TriageRunner, Depends(get_triage_runner)],
 ) -> CaptureResponse:
+    job = payload.to_job_slice()
     record = EngagementRecord(job=job)
     try:
         record.triage = triage_runner(job)  # typed, VERBATIM merge (D-02/ORC-02)

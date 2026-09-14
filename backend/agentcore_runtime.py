@@ -29,7 +29,6 @@ from typing import Any, Optional
 from uuid import UUID
 
 import api
-from models.engagement_record import EngagementRecord, JobSlice
 from store.engagement_store import EngagementStore
 from store.factory import build_engagement_store
 
@@ -52,9 +51,11 @@ def handle_invocation(payload: dict, store: EngagementStore) -> dict:
 
     try:
         if action == "capture":
-            job = JobSlice.model_validate(payload.get("job") or {})
+            # Accepts a structured job or {raw_text} (extension contract) — the
+            # CaptureRequest validator resolves either into a JobSlice.
+            capture_req = api.CaptureRequest.model_validate(payload.get("job") or {})
             response = api.capture(
-                job=job, store=store, triage_runner=api.get_triage_runner()
+                payload=capture_req, store=store, triage_runner=api.get_triage_runner()
             )
             return response.model_dump(mode="json")
 

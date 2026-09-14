@@ -45,8 +45,31 @@ def test_capture_round_trips_via_get(client):
 
 
 def test_capture_rejects_malformed_payload(client):
-    """T-03-01: a body missing required title/description fails Pydantic
-    validation with a native 422 -- never a 500."""
+    """T-03-01: a body missing required title/description (and with no raw_text)
+    fails Pydantic validation with a native 422 -- never a 500."""
     response = client.post("/capture", json={"budget": 500.0})
 
     assert response.status_code == 422
+
+
+def test_capture_accepts_raw_text_from_extension(client):
+    """Phase 4 extension contract: POST {raw_text} (what the MV3 popup sends) is
+    accepted, structured fields are recovered deterministically via
+    extract_job_fields (TRI-01), and triage runs to a verdict -- no Bedrock."""
+    raw = (
+        "Build a marketing site\n"
+        "Standard React build with a clear scope and a 6-week deadline. "
+        "Budget: $2,000 fixed.\n"
+    )
+    response = client.post("/capture", json={"raw_text": raw})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["verdict"] in ("apply", "skip")
+    assert isinstance(body["score"], float)
+    UUID(body["engagement_id"])
+
+    # The extracted fields (first line -> title) reach the persisted record.
+    get_body = client.get(f"/engagements/{body['engagement_id']}").json()
+    assert get_body["job"]["title"] == "Build a marketing site"
+    assert get_body["job"]["description"]
