@@ -73,7 +73,22 @@ expected: |
   The popup shows an explicit pending state, then renders the returned verdict,
   score, and reasoning inline once /capture responds — completing the round trip
   after a cold start.
-result: [pending]
+result: issue
+severity: major
+reported: |
+  Extension loaded in Chrome and reached the backend, but the round trip failed:
+  popup showed "Triage failed — The backend returned 422 Unprocessable Entity"
+  with detail {"type":"missing","loc":["body","title"],"msg":"Field required"}.
+gap: |
+  Cross-phase contract mismatch (Phase 4 extension vs Phase 3 /capture):
+  - extension/popup.js posts { raw_text: <pasted text> } and expects extracted
+    fields back (renderDefinition("Title", extracted.title)).
+  - backend/api.py POST /capture requires a structured JobSlice with mandatory
+    `title` and `description`, so the raw_text body 422s.
+  Correct fix (backend-side, offline-safe): accept raw_text on /capture and derive
+  the JobSlice via Phase 2's deterministic extract_job_fields (TRI-01), while still
+  accepting the existing structured JobSlice payload for backward compatibility
+  (existing /capture tests + run_demo). No Bedrock required.
 
 ### 3. Live AgentCore Memory round-trip + Runtime  (DEPLOY-01/02 — Phase 8, OPTIONAL)
 steps: |
