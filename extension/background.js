@@ -23,7 +23,13 @@
  */
 
 const BACKEND_ORIGIN = "http://localhost:8000";
-const CAPTURE_ENDPOINT = `${BACKEND_ORIGIN}/capture`;
+// Two capture routes, deliberately separate endpoints:
+//   /capture/text        — deterministic regex extraction (TRI-01). The demo
+//                          and the DEMO-02 determinism tests run through here.
+//   /capture/screenshots — vision extraction, not deterministic, so it is kept
+//                          off the fixture path on purpose.
+const TEXT_ENDPOINT = `${BACKEND_ORIGIN}/capture/text`;
+const SCREENSHOTS_ENDPOINT = `${BACKEND_ORIGIN}/capture/screenshots`;
 
 // Triage runs a real Bedrock call, so the ceiling is generous. It exists at
 // all so a backend that never answers surfaces as a readable timeout in the
@@ -34,12 +40,12 @@ const REQUEST_TIMEOUT_MS = 120_000;
  * POST the pasted job to /capture and return a plain result envelope.
  * Never throws: the popup renders `ok: false` as an error card.
  */
-async function captureJob(payload) {
+async function captureJob(endpoint, payload) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(CAPTURE_ENDPOINT, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -49,10 +55,20 @@ async function captureJob(payload) {
     const bodyText = await response.text();
 
     if (!response.ok) {
+      // FastAPI puts the useful part in {detail}; a bare status code tells the
+      // user nothing actionable ("we couldn't read a title in those shots" is
+      // the message that matters, not "422").
+      let detail = bodyText.slice(0, 500);
+      try {
+        const parsed = JSON.parse(bodyText);
+        if (parsed && parsed.detail) detail = String(parsed.detail);
+      } catch {
+        /* keep the raw body */
+      }
       return {
         ok: false,
         error: `The backend returned ${response.status} ${response.statusText}.`,
-        detail: bodyText.slice(0, 500),
+        detail,
       };
     }
 
@@ -83,13 +99,19 @@ async function captureJob(payload) {
   }
 }
 
+const ROUTES = {
+  CAPTURE_JOB: TEXT_ENDPOINT,
+  CAPTURE_SCREENSHOTS: SCREENSHOTS_ENDPOINT,
+};
+
 // Registered at top level -- see COLD START above. Returning true keeps the
 // message channel open for the async sendResponse.
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (!message || message.type !== "CAPTURE_JOB") {
+  const endpoint = message && ROUTES[message.type];
+  if (!endpoint) {
     return false;
   }
 
-  captureJob(message.payload).then(sendResponse);
+  captureJob(endpoint, message.payload).then(sendResponse);
   return true;
 });

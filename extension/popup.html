@@ -36,6 +36,16 @@
       <button id="submit-button" class="button" type="submit">Run triage</button>
     </form>
 
+    <div class="or-divider"><span>or</span></div>
+
+    <button id="screenshot-button" class="button button--secondary" type="button">
+      Capture with screenshots
+    </button>
+    <p class="panel__body">
+      Opens a small window. You pick the tab, then grab each section of the
+      posting as you scroll — no copying needed.
+    </p>
+
     <section id="pending" class="panel panel--pending" hidden>
       <span class="spinner" aria-hidden="true"></span>
       <div>
@@ -68,6 +78,7 @@
       </button>
     </section>
 
+    <script src="render_result.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
