@@ -284,3 +284,112 @@ body {
   margin: 0;
   word-break: break-word;
 }
+
+/* --- Screenshot capture window -------------------------------------------
+   Opened via chrome.windows.create as its own popup window, so unlike the
+   extension popup it is not constrained to 380px and is not destroyed when
+   Chrome's share picker takes focus. */
+
+.capture-window {
+  width: auto;
+  max-width: 460px;
+}
+
+.capture-step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-wrap {
+  /* A fixed aspect box keeps the layout from jumping as the shared tab
+     scrolls and the frame's dimensions change. */
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.shots {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.shot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.shot__ordinal {
+  flex: 0 0 auto;
+  width: 20px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.shot__thumb {
+  width: 104px;
+  height: 60px;
+  object-fit: cover;
+  object-position: top center; /* the top of a section is the identifying part */
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.shot__remove {
+  margin: 0 0 0 auto;
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.capture-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.capture-actions .button {
+  flex: 1;
+}
+
+/* --- "or" divider between the two capture modes --- */
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 10px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}

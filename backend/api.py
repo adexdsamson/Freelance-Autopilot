@@ -32,12 +32,12 @@ api.py is the ONLY module in this codebase that imports the store.
 """
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 from uuid import UUID
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from strands.types.exceptions import (
     ContextWindowOverflowException,
     ModelThrottledException,
@@ -55,6 +55,12 @@ from models.engagement_record import (
     ProposalContractResult,
     ProposalSlice,
 )
+from tools.extract_from_screenshots import (
+    ScreenshotExtractionError,
+    extract_job_fields_from_screenshots,
+)
+from models.triage import ExtractedJobFields
+from tools.triage_tools import extract_job_fields
 from store.engagement_store import EngagementStore
 from store.factory import build_engagement_store
 
@@ -153,6 +159,85 @@ def capture(
         score=record.triage.score,
         reasoning=record.triage.reasoning,
     )
+
+
+
+class CaptureTextRequest(BaseModel):
+    """Body for `/capture/text` — what the extension's paste mode sends."""
+
+    raw_text: str = Field(min_length=1)
+    source_url: Optional[str] = None
+
+
+class CaptureScreenshotsRequest(BaseModel):
+    """Body for `/capture/screenshots` — the extension's screenshot mode.
+
+    `screenshots` are ordered scrolled sections of one posting, as data URLs
+    or bare base64. Order matters; see tools/extract_from_screenshots.py.
+    """
+
+    screenshots: list[str] = Field(min_length=1)
+    source_url: Optional[str] = None
+
+
+def _job_slice_from(fields) -> JobSlice:
+    """ExtractedJobFields -> JobSlice (PRD 6.2). A field copy, not a
+    translation — which is why the two were kept shape-compatible."""
+    return JobSlice(
+        title=fields.title,
+        description=fields.description,
+        budget=fields.budget,
+        client_stats=fields.client_stats.model_dump(),
+    )
+
+
+@app.post("/capture/text", response_model=CaptureResponse)
+def capture_text(
+    body: CaptureTextRequest,
+    store: Annotated[EngagementStore, Depends(get_store)],
+    triage_runner: Annotated[TriageRunner, Depends(get_triage_runner)],
+) -> CaptureResponse:
+    """Capture from pasted text (CAP-01).
+
+    Extraction is the DETERMINISTIC regex path (TRI-01), so this endpoint is
+    safe for the demo and the fixture determinism tests. It delegates to
+    `capture()` rather than duplicating it, keeping one writer and one merge.
+    """
+    try:
+        fields = extract_job_fields(body.raw_text)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    return capture(
+        job=_job_slice_from(ExtractedJobFields.model_validate(fields)),
+        store=store,
+        triage_runner=triage_runner,
+    )
+
+
+@app.post("/capture/screenshots", response_model=CaptureResponse)
+def capture_screenshots(
+    body: CaptureScreenshotsRequest,
+    store: Annotated[EngagementStore, Depends(get_store)],
+    triage_runner: Annotated[TriageRunner, Depends(get_triage_runner)],
+) -> CaptureResponse:
+    """Capture from one or more screenshots (CAP-04).
+
+    Extraction here is a VISION call and therefore not deterministic — this
+    endpoint is deliberately off the fixture/demo path (DEMO-02). Once the
+    fields are extracted it delegates to `capture()`, so the gate, the
+    scorecard, the verbatim typed merge and the store write are identical to
+    every other capture route.
+    """
+    try:
+        fields = extract_job_fields_from_screenshots(body.screenshots)
+    except ScreenshotExtractionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 — never surface a raw 500 from vision
+        mapped = map_bedrock_error(exc)
+        raise HTTPException(status_code=503, detail=str(mapped)) from mapped
+
+    return capture(job=_job_slice_from(fields), store=store, triage_runner=triage_runner)
 
 
 @app.get("/engagements/{engagement_id}", response_model=EngagementRecord)

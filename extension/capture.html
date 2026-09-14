@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Capture job screenshots</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="capture-window">
+    <header class="header">
+      <h1 class="header__title">Capture job screenshots</h1>
+      <p class="header__subtitle" id="step-hint">
+        Pick the tab showing the job posting, then grab each section as you scroll.
+      </p>
+    </header>
+
+    <section id="start-step" class="capture-step">
+      <button id="start-button" class="button" type="button">Choose tab to capture</button>
+      <p class="panel__body">
+        Chrome will ask which tab or window to share. Nothing is captured until
+        you press the button below for each section.
+      </p>
+    </section>
+
+    <section id="shooting-step" class="capture-step" hidden>
+      <div class="preview-wrap">
+        <video id="preview" class="preview" autoplay muted playsinline></video>
+      </div>
+      <button id="shoot-button" class="button" type="button">Capture this section</button>
+      <p class="panel__body">
+        Scroll the job page, then capture again. Each shot is one section of the
+        posting, in order.
+      </p>
+
+      <h2 class="result__heading">
+        Captured <span id="shot-count" class="score">0</span>
+      </h2>
+      <ol id="shots" class="shots"></ol>
+
+      <div class="capture-actions">
+        <button id="submit-button" class="button" type="button" disabled>Run triage</button>
+        <button id="stop-button" class="button button--secondary" type="button">
+          Stop sharing
+        </button>
+      </div>
+    </section>
+
+    <section id="pending" class="panel panel--pending" hidden>
+      <span class="spinner" aria-hidden="true"></span>
+      <div>
+        <p class="panel__title">Reading the screenshots…</p>
+        <p class="panel__body">Extracting fields, running the gate, then scoring.</p>
+      </div>
+    </section>
+
+    <section id="error" class="panel panel--error" hidden>
+      <p class="panel__title">Capture failed</p>
+      <p class="panel__body" id="error-message"></p>
+      <p class="panel__detail" id="error-detail" hidden></p>
+      <button id="retry-button" class="button button--secondary" type="button">Back</button>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <div class="verdict">
+        <span id="verdict-badge" class="badge">—</span>
+        <span id="score" class="score"></span>
+      </div>
+      <h2 class="result__heading">Reasoning</h2>
+      <p id="reasoning" class="reasoning"></p>
+      <h2 class="result__heading">Extracted</h2>
+      <dl id="extracted" class="extracted"></dl>
+      <button id="new-capture-button" class="button button--secondary" type="button">
+        Capture another
+      </button>
+    </section>
+
+    <script src="render_result.js"></script>
+    <script src="capture.js"></script>
+  </body>
+</html>

@@ -50,7 +50,8 @@ justified, not decorative.
 ### Out of Scope
 
 - Live Upwork API integration — Upwork ToS risk; paste-based capture is used instead.
-- Automated DOM scraping of live job pages — ToS risk; the extension reads user-pasted text only.
+- Automated DOM scraping of live job pages — ToS risk; the extension reads user-pasted text or
+  user-captured screenshots, never the DOM.
 - Live email/calendar/payment provider integration for Stages 2–3 — out of demo scope; fixtures drive these stages.
 - Production-grade auth, multi-tenant user management, billing — a single local API key suffices for the demo.
 - Mobile app — web/extension only.
@@ -70,7 +71,10 @@ justified, not decorative.
 
 - **Timeline**: Hackathon deadline Sep 14, 2026 — roughly six weeks; tight for three agent stages + extension + optional AgentCore deploy + video.
 - **Tech stack**: Strands Agents SDK, FastAPI, Claude via Bedrock, Manifest V3 vanilla JS.
-- **Compliance**: No automated scraping of Upwork; paste-based capture only (ToS).
+- **Compliance**: No automated scraping of Upwork (ToS). Capture is user-driven only — pasted text, or
+  user-initiated screenshots taken through Chrome's own share picker. The extension declares no
+  DOM-access permission (`permissions` is empty), never reads the page, and never scrolls it for the
+  user; the user scrolls and captures each section themselves.
 - **Demo**: Must run deterministically for a ≤5-minute recorded walkthrough; fixtures make Stages 2–3 repeatable.
 - **Licensing**: Public repo with an MIT or Apache-2.0 license visible in the About section (submission rule).
 
@@ -79,7 +83,8 @@ justified, not decorative.
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Supervisor + 3 specialist agents (not one wrapped call) | Judging criteria reward genuine multi-agent Strands orchestration | — Pending |
-| Paste-based capture in the extension | Sidesteps Upwork ToS/scraping risk with minimal added friction | — Pending |
+| Paste-based capture in the extension | Sidesteps Upwork ToS/scraping risk with minimal added friction | — Accepted |
+| Screenshot capture via Chrome's share picker, multi-shot | Removes the copy/paste chore without taking any DOM-access permission. Rejected `scripting` scroll-and-stitch and `debugger` captureBeyondViewport: both reverse the no-scraping stance, and the latter shows a debugging banner through the demo | — Accepted |
 | Fixtures drive Stages 2–3 | Deterministic, repeatable 5-minute demo without live integrations | — Pending |
 | Escalations only where structurally justified (scope ambiguity, scope creep, overdue invoice) | Human-in-the-loop must be meaningful, not decorative | — Pending |
 | AgentCore deployment as a stretch goal | Strengthens but does not gate the technical score; first to cut if time slips | — Pending |

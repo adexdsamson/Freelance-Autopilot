@@ -76,7 +76,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send(204, {})
 
     def do_POST(self):
-        if self.path != "/capture":
+        if self.path not in ("/capture", "/capture/text", "/capture/screenshots"):
             self._send(404, {"detail": "not found"})
             return
 
@@ -85,6 +85,21 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
         except json.JSONDecodeError:
             self._send(400, {"detail": "body is not JSON"})
+            return
+
+        if self.path == "/capture/screenshots":
+            shots = body.get("screenshots") or []
+            if not shots:
+                self._send(422, {"detail": "screenshots is required"})
+                return
+            # The stub cannot run vision, so it returns the canned extraction
+            # and reports how many frames it received -- enough to verify the
+            # extension end of the flow.
+            result = dict(CANNED)
+            result["reasoning"] = (
+                f"[stub] read {len(shots)} screenshot section(s). " + CANNED["reasoning"]
+            )
+            self._reply_with(result)
             return
 
         raw_text = (body.get("raw_text") or "").strip()
@@ -101,11 +116,16 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(502, {"detail": f"triage failed: {type(e).__name__}"})
                 return
 
+        self._reply_with(result)
+
+    def _reply_with(self, result):
+        import uuid as _uuid
+
         extracted = result["extracted_fields"]
         self._send(
             200,
             {
-                "engagement_id": str(uuid.uuid4()),
+                "engagement_id": str(_uuid.uuid4()),
                 "job": {
                     "title": extracted["title"],
                     "description": extracted["description"],
