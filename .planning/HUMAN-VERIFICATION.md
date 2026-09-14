@@ -34,7 +34,13 @@ expected: |
   Triage, Proposal-Contract, and Ops specialists — not one flat call. On a bad
   credential/model, it fails fast with a readable 503 and no credential value is
   printed.
-result: [pending]
+result: partial
+notes: |
+  Fail-fast half VERIFIED on Windows (2026-09-14): with *_BACKEND=supervisor and
+  no AWS credentials, `python -m scripts.run_demo --fixture creep` returned
+  `503: {"detail":"no AWS credentials found for Bedrock."}` at STEP 1 — readable,
+  credential-free fail-fast (ORC-03). The full four-agent live trace still needs
+  real AWS credentials + Claude model access.
 
 ### 2. Extension live round-trip in Chrome  (CAP-02 — Phase 4)
 steps: |
