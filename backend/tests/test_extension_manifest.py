@@ -21,6 +21,15 @@ EXTENSION_DIR = Path(__file__).resolve().parent.parent.parent / "extension"
 # Permissions that would make reading a live page possible. None may appear.
 SCRAPING_PERMISSIONS = {"tabs", "activeTab", "scripting", "webNavigation", "debugger"}
 
+# Screenshot capture (CAP-04) deliberately adds NONE of these either.
+# getDisplayMedia() shows Chrome's own picker and needs no manifest
+# permission; chrome.windows.create and chrome.runtime.getURL need none. The
+# alternative routes to a full-page image -- scroll-and-stitch via `scripting`,
+# or `debugger` + captureBeyondViewport -- would each have reversed
+# PROJECT.md's no-scraping decision, so the user scrolls instead and captures
+# each section. This set exists so that choice cannot be quietly undone.
+SCREENSHOT_PERMISSIONS_NOT_TAKEN = {"desktopCapture", "pageCapture", "downloads"}
+
 
 @pytest.fixture(scope="module")
 def manifest() -> dict:
@@ -40,6 +49,17 @@ def test_extension_holds_no_permission_that_could_read_a_live_page(manifest):
     assert declared & SCRAPING_PERMISSIONS == set()
 
 
+def test_screenshot_capture_added_no_permissions_at_all(manifest):
+    """CAP-04 was implemented via Chrome's share picker precisely so the
+    permission surface would not grow. If this fails, someone reached for
+    scripting/debugger/desktopCapture and the ToS posture needs revisiting."""
+    declared = set(manifest.get("permissions", [])) | set(
+        manifest.get("optional_permissions", [])
+    )
+    assert declared & SCREENSHOT_PERMISSIONS_NOT_TAKEN == set()
+    assert manifest.get("permissions", []) == []
+
+
 def test_no_content_scripts_are_declared(manifest):
     """A content script is the other way to read a page's DOM."""
     assert "content_scripts" not in manifest
@@ -53,15 +73,27 @@ def test_host_permissions_are_scoped_to_the_backend_origin_only(manifest):
     assert "<all_urls>" not in hosts
 
 
-@pytest.mark.parametrize("filename", ["popup.html", "popup.js", "background.js", "styles.css"])
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "popup.html",
+        "popup.js",
+        "background.js",
+        "styles.css",
+        "capture.html",
+        "capture.js",
+        "render_result.js",
+    ],
+)
 def test_every_file_the_prd_specifies_exists(filename):
     assert (EXTENSION_DIR / filename).is_file()
 
 
-def test_popup_html_has_no_inline_script_or_handlers():
-    """MV3's content security policy rejects both outright, so a popup that
+@pytest.mark.parametrize("page", ["popup.html", "capture.html"])
+def test_extension_pages_have_no_inline_script_or_handlers(page):
+    """MV3's content security policy rejects both outright, so a page that
     relies on either silently does nothing when loaded as an extension."""
-    html = (EXTENSION_DIR / "popup.html").read_text()
+    html = (EXTENSION_DIR / page).read_text()
     assert not re.search(r"<script(?![^>]*\bsrc=)[^>]*>", html), "inline <script> block"
     assert not re.search(r"\son[a-z]+\s*=", html), "inline event handler attribute"
 
@@ -73,12 +105,22 @@ def _strip_js_comments(source: str) -> str:
     return re.sub(r"//[^\n]*", "", source)
 
 
-def test_popup_never_writes_untrusted_text_as_markup():
-    """The posting is untrusted paste and the reasoning is model output;
-    both reach the DOM only via textContent."""
-    code = _strip_js_comments((EXTENSION_DIR / "popup.js").read_text())
+@pytest.mark.parametrize("script", ["popup.js", "capture.js", "render_result.js"])
+def test_no_script_writes_untrusted_text_as_markup(script):
+    """The posting is untrusted -- pasted text, or now text read by a model off
+    a screenshot of someone else's page -- and the reasoning is model output.
+    All of it reaches the DOM only via textContent."""
+    code = _strip_js_comments((EXTENSION_DIR / script).read_text())
     assert "innerHTML" not in code
     assert "insertAdjacentHTML" not in code
+
+
+def test_capture_window_stops_the_media_stream_when_it_closes():
+    """A screen-share left running after the window closes leaves Chrome's
+    sharing indicator up and the tab still being captured."""
+    code = (EXTENSION_DIR / "capture.js").read_text()
+    assert "track.stop()" in code
+    assert 'addEventListener("unload", stopSharing)' in code
 
 
 def test_background_registers_its_message_listener_at_the_top_level():

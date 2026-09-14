@@ -37,6 +37,7 @@ Requirements for the hackathon submission. Each maps to roadmap phases.
 - [x] **CAP-01**: A Manifest V3 extension popup provides a paste-based capture flow (no live DOM scraping) and submits the job payload.
 - [x] **CAP-02**: The extension `background.js` service worker POSTs the payload to the backend `/capture` endpoint (host_permissions scoped to the backend origin).
 - [x] **CAP-03**: The popup displays the returned triage verdict, score, and reasoning inline once the agent responds.
+- [x] **CAP-04**: The extension can capture a posting as screenshots instead of pasted text — the user picks the surface via Chrome's share picker and grabs each section as they scroll, and all frames are read as one page. Adds no permissions and no DOM access.
 
 ### Proposal-Contract (Stage 2 — escalates on ambiguity)
 
@@ -101,6 +102,7 @@ Populated during roadmap creation.
 | CAP-01 | Phase 4 | Complete |
 | CAP-02 | Phase 4 | Complete |
 | CAP-03 | Phase 4 | Complete |
+| CAP-04 | Phase 4.1 | Complete |
 | PROP-01 | Phase 5 | Complete |
 | PROP-02 | Phase 5 | Complete |
 | PROP-03 | Phase 5 | Complete |
