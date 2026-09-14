@@ -73,22 +73,29 @@ expected: |
   The popup shows an explicit pending state, then renders the returned verdict,
   score, and reasoning inline once /capture responds — completing the round trip
   after a cold start.
-result: issue
-severity: major
-reported: |
-  Extension loaded in Chrome and reached the backend, but the round trip failed:
-  popup showed "Triage failed — The backend returned 422 Unprocessable Entity"
-  with detail {"type":"missing","loc":["body","title"],"msg":"Field required"}.
-gap: |
-  Cross-phase contract mismatch (Phase 4 extension vs Phase 3 /capture):
-  - extension/popup.js posts { raw_text: <pasted text> } and expects extracted
-    fields back (renderDefinition("Title", extracted.title)).
-  - backend/api.py POST /capture requires a structured JobSlice with mandatory
-    `title` and `description`, so the raw_text body 422s.
-  Correct fix (backend-side, offline-safe): accept raw_text on /capture and derive
-  the JobSlice via Phase 2's deterministic extract_job_fields (TRI-01), while still
-  accepting the existing structured JobSlice payload for backward compatibility
-  (existing /capture tests + run_demo). No Bedrock required.
+result: pass
+verified: 2026-09-14
+notes: |
+  Live round-trip CONFIRMED in Chrome on the offline placeholder path. Paste ->
+  submit rendered the verdict inline: SKIP, Score 0.1/100, reasoning "budget 25.0
+  is below the placeholder floor (100.0) — kill-switch rule fired", plus the
+  extracted Engagement id — exactly the CAP-02/CAP-03 contract, after an MV3
+  cold start.
+  Two defects were found and fixed en route to this pass:
+  - 422 "Field required: body.title": the extension posts { raw_text } but the
+    original /capture required a structured JobSlice. Resolved by the dedicated
+    POST /capture/text endpoint (deterministic extract_job_fields, TRI-01) that
+    the extension's background.js now targets — landed in the
+    gsd/phase-04.1-screenshot-capture merge (00158cb). (An alternative PR #9 that
+    widened /capture itself was closed as superseded.)
+  - Paste draft lost whenever the popup lost focus (MV3 tears the popup document
+    down on blur — e.g. switching windows to copy the job URL). Fixed by mirroring
+    the job-text/URL fields to localStorage on input and restoring them on reopen;
+    localStorage needs no manifest permission, so the empty `permissions` posture
+    (test_extension_manifest.py) is intact (PR #10, merged, commit fa6a181).
+  Screenshot mode (POST /capture/screenshots) is a vision call and still needs
+  live Bedrock, so it shares Check 1's account gate; paste mode is the offline
+  demo path and is fully verified here.
 
 ### 3. Live AgentCore Memory round-trip + Runtime  (DEPLOY-01/02 — Phase 8, OPTIONAL)
 steps: |
@@ -112,6 +119,7 @@ result: [pending]
 ## Summary
 
 total: 4
-passed: 0
+passed: 1
+partial: 1
 issues: 0
-pending: 4
+pending: 2
