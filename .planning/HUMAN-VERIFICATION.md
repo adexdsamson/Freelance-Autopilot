@@ -36,11 +36,21 @@ expected: |
   printed.
 result: partial
 notes: |
-  Fail-fast half VERIFIED on Windows (2026-09-14): with *_BACKEND=supervisor and
-  no AWS credentials, `python -m scripts.run_demo --fixture creep` returned
-  `503: {"detail":"no AWS credentials found for Bedrock."}` at STEP 1 — readable,
-  credential-free fail-fast (ORC-03). The full four-agent live trace still needs
-  real AWS credentials + Claude model access.
+  Progress on Windows (2026-09-14):
+  - Fail-fast half VERIFIED: with no AWS credentials, STEP 1 returned
+    `503: {"detail":"no AWS credentials found for Bedrock."}` — readable,
+    credential-free fail-fast (ORC-03).
+  - With valid AWS credentials the app authenticated and reached Bedrock. The
+    live trace showed the Supervisor invoking the specialist as a tool
+    (`Tool #1: gig_triage_agent, tool_use_id=<tooluse_...>`) — real agents-as-tools
+    orchestration (ORC-01/ORC-02) executing against Bedrock.
+  - Remaining blocker is an AWS ACCOUNT step, not code: Bedrock returned
+    ResourceNotFoundException "Model use case details have not been submitted for
+    this account. Fill out the Anthropic use case details form before using the
+    model." The app mapped it to a clean 503 with no credential leak. Complete the
+    Anthropic use-case form in Bedrock Model access (us-east-1), wait ~15 min, retry.
+  - SECURITY: the AWS key used was exposed in a screenshot during testing and must
+    be rotated/deleted.
 
 ### 2. Extension live round-trip in Chrome  (CAP-02 — Phase 4)
 steps: |
