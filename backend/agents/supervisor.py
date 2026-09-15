@@ -13,12 +13,35 @@ depend on `delegate` firing.
 """
 from __future__ import annotations
 
+import os
+
 from strands import Agent
+from strands.models import BedrockModel
 
 from agents.gig_triage_agent import build_gig_triage_agent
 from agents.ops_agent import build_ops_agent
 from agents.proposal_contract_agent import build_proposal_contract_agent
 from models.engagement_record import OpsResult, ProposalContractResult, TriageSlice
+
+# The Supervisor needs its OWN explicit model, exactly like each specialist
+# (gig_triage_agent / proposal_contract_agent / ops_agent). Without a `model=`
+# argument, strands falls back to its built-in DEFAULT Bedrock model, which
+# ignores BEDROCK_MODEL_ID and fails with ResourceNotFoundException on any
+# account/region where that default id is not an enabled inference profile
+# (e.g. an account using Amazon Nova, or a region without the default Claude
+# profile). Reading the same two env vars the specialists read keeps all four
+# agents on one configured model. See CLAUDE.md STACK §4: pass an explicit
+# BedrockModel, never rely on the default.
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.anthropic.claude-sonnet-4-6")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+
+
+def _supervisor_model() -> BedrockModel:
+    """Explicit BedrockModel for the Supervisor's own routing calls, wired from
+    the same BEDROCK_MODEL_ID / AWS_REGION the specialists use. Construction
+    performs no network call (safe without AWS credentials); only invocation
+    reaches Bedrock."""
+    return BedrockModel(model_id=MODEL_ID, region_name=REGION)
 
 
 def build_supervisor() -> Agent:
@@ -42,6 +65,7 @@ def build_supervisor() -> Agent:
             "Never answer yourself."
         ),
         tools=[triage_tool],
+        model=_supervisor_model(),
     )
 
 
@@ -93,6 +117,7 @@ def build_proposal_supervisor() -> Agent:
             "proposal_contract_agent tool. Never answer yourself."
         ),
         tools=[proposal_tool],
+        model=_supervisor_model(),
     )
 
 
@@ -173,6 +198,7 @@ def build_full_supervisor() -> Agent:
             "and never call more than one specialist tool in a single turn."
         ),
         tools=[triage_tool, proposal_tool, ops_tool],
+        model=_supervisor_model(),
     )
 
 
